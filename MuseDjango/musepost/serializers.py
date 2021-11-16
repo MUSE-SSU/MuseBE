@@ -10,7 +10,17 @@ class PostUploadSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ("title", "writer", "image", "content", "week", "topic", "hashtag", "is_contest", "cur_status")
+        fields = (
+            "title",
+            "writer",
+            "image",
+            "content",
+            "week",
+            "topic",
+            "hashtag",
+            "is_contest",
+            "cur_status",
+        )
 
 
 class PostLikeSerializer(serializers.ModelSerializer):
@@ -109,7 +119,7 @@ class CommentDisplaySerializer(serializers.ModelSerializer):
         return MEDIA_URL + str(obj.writer.profile.avatar)
 
 
-'''
+"""
 class PostDisplayMyPageSerializer(serializers.ModelSerializer):
     writer = serializers.SlugRelatedField(slug_field="nickname", read_only=True)
     writer_avatar = serializers.SerializerMethodField()
@@ -170,7 +180,7 @@ class PostDisplayMyPageLikeSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         self.fields['post_id'] = PostDisplayMyPageSerializer(read_only=True)
         return super(PostDisplayMyPageLikeSerializer, self).to_representation(instance)
-'''
+"""
 
 
 class PostDisplayDetailSerializer(serializers.ModelSerializer):
@@ -180,6 +190,7 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
     comment = serializers.SerializerMethodField()
     is_login_user_liked = serializers.SerializerMethodField()
     is_writer = serializers.SerializerMethodField()
+    writer_other_post = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -201,7 +212,29 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             "modified_at",
             "hashtag",
             "comment",
+            "writer_other_post",
         )
+
+    def get_writer_other_post(self, obj):
+        try:
+            login_user = self.context.get("request")
+            post_obj = (
+                Post.objects.filter(writer=obj.writer)
+                .exclude(idx=obj.idx)
+                .order_by("-likes", "-views")
+            )
+            if post_obj:
+                count_post = post_obj.count()
+                if count_post >= 3:
+                    post_obj = post_obj[:3]
+                elif 1 <= count_post < 3:
+                    post_obj = post_obj[:count_post]
+                srl = PostDisplayAllSerializer(
+                    post_obj, context={"request": login_user}, many=True
+                )
+        except:
+            return None
+        return srl.data
 
     # noinspection PyMethodMayBeStatic
     def get_writer_avatar(self, obj):

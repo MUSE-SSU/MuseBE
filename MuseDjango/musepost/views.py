@@ -23,12 +23,12 @@ def post_upload(request):
             title = request.POST["title"]
             content = request.POST["content"]
             image = request.FILES["image"]
-            hashtag = request.POST.get("hashtag", '').strip()
+            hashtag = request.POST.get("hashtag", "").strip()
         except:
             return JsonResponse({"message": "REQUEST ERROR"}, status=400)
 
-        if hashtag != '':
-            hashtag = hashtag.split(' ')
+        if hashtag != "":
+            hashtag = hashtag.split(" ")
 
         try:
             cur_contest = Topic.objects.get(activate_week=True)
@@ -36,7 +36,7 @@ def post_upload(request):
             topic = cur_contest.topic
         except:
             week = 0
-            topic = '미정'
+            topic = "미정"
 
         data = {
             "writer": request.user,
@@ -77,11 +77,11 @@ def post_display_all(request, page):
         offset = int(limit - page_size)
 
         if order_by == "recent":
-            post = Post.objects.all().order_by('-created_at')
+            post = Post.objects.all().order_by("-created_at")
         elif order_by == "views":
-            post = Post.objects.order_by('-views', '-created_at')
-        else:   # Default: likes
-            post = Post.objects.order_by('-likes', '-created_at')
+            post = Post.objects.order_by("-views", "-created_at")
+        else:  # Default: likes
+            post = Post.objects.order_by("-likes", "-created_at")
 
         count_post = post.count()
 
@@ -130,14 +130,14 @@ def post_display_contest_topic(request):
             return JsonResponse({"message": "REQUEST ERROR"}, status=400)
 
         if week is None:
-            week = Post.objects.aggregate(Max('week'))['week__max']
+            week = Post.objects.aggregate(Max("week"))["week__max"]
 
         if order_by == "recent":
-            post = Post.objects.filter(week=week).order_by('-created_at')
+            post = Post.objects.filter(week=week).order_by("-created_at")
         elif order_by == "views":
-            post = Post.objects.filter(week=week).order_by('-views', '-created_at')
-        else:   # Default: likes
-            post = Post.objects.filter(week=week).order_by('-likes', '-created_at')
+            post = Post.objects.filter(week=week).order_by("-views", "-created_at")
+        else:  # Default: likes
+            post = Post.objects.filter(week=week).order_by("-likes", "-created_at")
 
         serializer = PostDisplayAllSerializer(
             post, context={"request": request}, many=True
@@ -151,7 +151,7 @@ def post_display_contest_topic(request):
 def post_display_muse(request):
     if request.method == "GET":
         # muse 선정된 게시물, 최신 주차별로 정렬
-        post = Post.objects.filter(is_muse=True).order_by('-week', '-created_at')
+        post = Post.objects.filter(is_muse=True).order_by("-week", "-created_at")
         serializer = PostDisplayAllSerializer(
             post, context={"request": request}, many=True
         )
@@ -167,12 +167,12 @@ def post_update(request, post_idx):
             title = request.POST["title"]
             content = request.POST["content"]
             # image = request.FILES["image"]
-            hashtag = request.POST.get("hashtag", '').strip()
+            hashtag = request.POST.get("hashtag", "").strip()
         except:
             return JsonResponse({"message": "REQUEST ERROR"}, status=400)
 
-        if hashtag != '':
-            hashtag = hashtag.split(' ')
+        if hashtag != "":
+            hashtag = hashtag.split(" ")
 
         try:
             if Post.objects.filter(idx=post_idx, writer=request.user).exists():
@@ -187,7 +187,9 @@ def post_update(request, post_idx):
                 if serializer.is_valid():
                     serializer.save()
                     return JsonResponse(serializer.data, safe=False, status=200)
-                return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return JsonResponse(
+                    serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
         except:
             return JsonResponse({"message": "UNAUTHORIZED"}, status=400)
     else:
