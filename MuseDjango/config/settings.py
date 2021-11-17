@@ -205,6 +205,6 @@ TAGGIT_LIMIT = 30
 
 # Crontab
 CRONJOBS = [
-    ('*/1 * * * *', 'musepost.cron.crontab_job', '>> ./logs/musepost_task.log'),
-    ('*/1 * * * *', 'musepost.cron.select_muse'),
+    ("*/1 * * * *", "musepost.cron.crontab_job", ">> ./logs/musepost_task.log"),
+    ("*/1 * * * *", "musepost.cron.select_muse"),
 ]

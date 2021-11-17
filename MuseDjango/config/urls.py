@@ -4,6 +4,9 @@ from django.urls import path, include
 # from django.conf.urls.static import static
 # from .settings import DEBUG, MEDIA_ROOT, MEDIA_URL
 
+admin.site.site_header = "⚡️ Muse DB ⚡️"
+admin.site.site_title = "⚡️ Muse DB ⚡️"
+admin.site.index_title = "⚡️ Muse 관리 ⚡️"
 
 urlpatterns = [
     path("admin/", admin.site.urls),

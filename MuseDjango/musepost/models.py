@@ -13,7 +13,11 @@ from taggit.models import TagBase, TaggedItemBase
 class Post(models.Model):
     idx = models.AutoField(primary_key=True, null=False, blank=False)
     writer = models.ForeignKey(
-        User, to_field="user_id", on_delete=models.CASCADE, related_name="post"
+        User,
+        to_field="user_id",
+        on_delete=models.CASCADE,
+        related_name="post",
+        verbose_name="작성자",
     )
 
     # 본문 content
@@ -39,6 +43,7 @@ class Post(models.Model):
 
     class Meta:
         db_table = "Post"
+        verbose_name_plural = "게시글"
 
     def __str__(self):
         return str(self.idx)
@@ -47,7 +52,11 @@ class Post(models.Model):
 class PostLike(models.Model):
     idx = models.AutoField(primary_key=True, null=False, blank=False)
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, db_column="post_idx", related_name="post_like"
+        Post,
+        on_delete=models.CASCADE,
+        db_column="post_idx",
+        related_name="post_like",
+        verbose_name="게시글",
     )
 
     like_user = models.ForeignKey(
@@ -56,10 +65,12 @@ class PostLike(models.Model):
         on_delete=models.CASCADE,
         db_column="like_user",
         related_name="likeUser",
+        verbose_name="좋아요 누른 유저",
     )
 
     class Meta:
         db_table = "Post_Like"
+        verbose_name_plural = "게시글 좋아요"
 
 
 # 댓글
@@ -67,7 +78,11 @@ class Comment(models.Model):
     # 해당 게시물
     idx = models.AutoField(primary_key=True, null=False, blank=False)
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, db_column="post_idx", related_name="comment"
+        Post,
+        on_delete=models.CASCADE,
+        db_column="post_idx",
+        related_name="comment",
+        verbose_name="게시글",
     )
     writer = models.ForeignKey(
         User,
@@ -75,12 +90,19 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         db_column="writer_id",
         related_name="comment",
+        verbose_name="작성자",
     )
 
     comment = models.CharField(max_length=128, verbose_name="댓글", default="None")
-
     created_at = models.DateTimeField(verbose_name="최초 업로드 날짜", auto_now_add=True)
     modified_at = models.DateTimeField(verbose_name="최근 수정 날짜", auto_now=True)
 
+    def get_post_id(self):
+        return str(self.post)
+
+    def get_writer_id(self):
+        return str(self.writer)
+
     class Meta:
         db_table = "Post_Comments"
+        verbose_name_plural = "댓글"
