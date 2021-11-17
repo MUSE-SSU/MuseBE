@@ -46,8 +46,8 @@ class User(AbstractBaseUser):
     nickname = models.CharField(max_length=50, verbose_name="닉네임", unique=True)
     # slug = models.SlugField(unique=True, blank=True, null=True, allow_unicode=True,)
 
-    date_joined = models.DateTimeField(verbose_name="date joined", auto_now_add=True)
-    last_login = models.DateTimeField(verbose_name="last login", auto_now=True)
+    date_joined = models.DateTimeField(verbose_name="최초 가입 날짜", auto_now_add=True)
+    last_login = models.DateTimeField(verbose_name="최근 로그인 날짜", auto_now=True)
 
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -69,6 +69,7 @@ class User(AbstractBaseUser):
 
     class Meta:
         db_table = "User"
+        verbose_name_plural = "유저"
 
 
 class UserProfile(models.Model):
@@ -79,13 +80,17 @@ class UserProfile(models.Model):
         db_column="user_id",
         primary_key=True,
         related_name="profile",
+        verbose_name="유저",
     )
-    badge = models.IntegerField(default=0)
+    badge = models.IntegerField(default=0, verbose_name="우승 뱃지")
     avatar = models.ImageField(
-        blank=True, storage=PublicMediaStorage(), upload_to=upload_profile_image
+        blank=True,
+        storage=PublicMediaStorage(),
+        upload_to=upload_profile_image,
+        verbose_name="프로필 사진",
     )
     self_introduce = models.CharField(
-        max_length=100, blank=True, null=True, verbose_name="자기소개"
+        max_length=100, blank=True, null=True, verbose_name="자기 소개"
     )
 
     def __str__(self):
@@ -93,6 +98,7 @@ class UserProfile(models.Model):
 
     class Meta:
         db_table = "UserProfile"
+        verbose_name_plural = "유저 프로필"
 
 
 class Follow(models.Model):
@@ -102,6 +108,7 @@ class Follow(models.Model):
         related_name="following",
         null=True,
         blank=True,
+        verbose_name="팔로우 누른 사람",
         on_delete=models.CASCADE,
     )
     follower = models.ForeignKey(
@@ -110,8 +117,10 @@ class Follow(models.Model):
         related_name="follower",
         null=True,
         blank=True,
+        verbose_name="팔로우 눌린 사람",
         on_delete=models.CASCADE,
     )
 
     class Meta:
         db_table = "UserFollow"
+        verbose_name_plural = "팔로우"
