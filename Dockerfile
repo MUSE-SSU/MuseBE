@@ -50,6 +50,10 @@ COPY $DOCKER_SRC/requirements.txt $DOCKER_SRVPROJ/requirements.txt
 # Install Python dependencies
 RUN pip3 install -r $DOCKER_SRVPROJ/requirements.txt
 
+ARG STAGE
+
+ENV STAGE=$STAGE
+
 #COPY sources
 COPY $DOCKER_SRC/manage.py $DOCKER_SRVPROJ/manage.py
 COPY $DOCKER_SRC/my_settings.py $DOCKER_SRVPROJ/my_settings.py

@@ -1,12 +1,13 @@
 version: '3'
 
 services:
-    mymuse:
+    muse:
         build:
             context: .
             dockerfile: ./Dockerfile
+            args:
+                STAGE: DEV
         ports:
             - 8080:8080
         tty: true
-        image: kyoungnam/museprojectsss
         platform: linux/amd64
