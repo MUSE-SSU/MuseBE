@@ -223,7 +223,8 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
                 .exclude(idx=obj.idx)
                 .order_by("-likes", "-views")
             )
-            if post_obj:
+            # print(post_obj)
+            if post_obj.exists():
                 count_post = post_obj.count()
                 if count_post >= 3:
                     post_obj = post_obj[:3]
@@ -232,9 +233,9 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
                 srl = PostDisplayAllSerializer(
                     post_obj, context={"request": login_user}, many=True
                 )
+            return srl.data
         except:
             return None
-        return srl.data
 
     # noinspection PyMethodMayBeStatic
     def get_writer_avatar(self, obj):

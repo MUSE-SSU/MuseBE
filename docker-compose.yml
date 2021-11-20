@@ -3,7 +3,6 @@ version: '3'
 services:
     muse:
         build:
-            image: kyoungnam/musedev
             context: .
             dockerfile: ./Dockerfile
             args:

@@ -92,7 +92,7 @@ class FollwerSerializer(serializers.ModelSerializer):
 
 class MyPageSerializer(serializers.ModelSerializer):
     is_owner = serializers.SerializerMethodField()
-    owner_post = serializers.SerializerMethodField()
+    # owner_post = serializers.SerializerMethodField()
     follower_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
     follower_list = serializers.SerializerMethodField()
@@ -110,7 +110,7 @@ class MyPageSerializer(serializers.ModelSerializer):
             "following_count",
             "follower_list",
             "following_list",
-            "owner_post",
+            # "owner_post",
         )
 
     def get_owner_info(self, obj):
@@ -129,13 +129,13 @@ class MyPageSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         return True if request.user == obj else False
 
-    def get_owner_post(self, obj):
-        login_user = self.context.get("request")
-        post_obj = Post.objects.filter(writer=obj).order_by("-created_at")
-        srl = PostDisplayAllSerializer(
-            post_obj, context={"request": login_user}, many=True
-        )
-        return srl.data
+    # def get_owner_post(self, obj):
+    #     login_user = self.context.get("request")
+    #     post_obj = Post.objects.filter(writer=obj).order_by("-created_at")
+    #     srl = PostDisplayAllSerializer(
+    #         post_obj, context={"request": login_user}, many=True
+    #     )
+    #     return srl.data
 
     def get_follower_count(self, obj):
         return Follow.objects.filter(follower=obj).count()

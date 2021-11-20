@@ -331,8 +331,27 @@ def my_page(request, nickname):
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
 
 
+@authorization_validator_or_none
+def owner_post(request, nickname):
+    if request.method == "GET":
+        try:
+            owner = User.objects.get(nickname=nickname)
+            owner_post = Post.objects.filter(writer=owner).order_by("-created_at")
+        except Exception as e:
+            return JsonResponse({"message": e}, status=400)
+        try:
+            serializer = PostDisplayAllSerializer(
+                owner_post, context={"request": request}, many=True
+            )
+            return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+        except Exception as e:
+            return JsonResponse({"message": e}, status=400)
+    else:
+        return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
+
+
 @authorization_validator
-def my_page_owner(request, nickname):
+def owner_liked_post(request, nickname):
     if request.method == "GET":
         try:
             owner_liked_post = Post.objects.filter(
