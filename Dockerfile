@@ -69,3 +69,6 @@ EXPOSE 8080
 WORKDIR $DOCKER_SRVPROJ
 
 ENTRYPOINT ["python3", "manage.py", "runserver", "0.0.0.0:8080"]
+
+# ENTRYPOINT ["./entrypoint.sh"]
+# CMD python3 manage.py runserver 0.0.0.0:8080
