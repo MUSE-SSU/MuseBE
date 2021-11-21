@@ -39,7 +39,7 @@ class FollowAdmin(admin.ModelAdmin):
         return obj.follower.nickname
 
     get_following_nickname.short_description = "팔로우 누른 사람"
-    get_follower_nickname.shor_description = "팔로우 눌린 사람"
+    get_follower_nickname.short_description = "팔로우 눌린 사람"
 
 
 admin.site.register(User, UserAdmin)
