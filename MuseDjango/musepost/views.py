@@ -72,7 +72,7 @@ def post_display_all(request, page):
         except:
             return JsonResponse({"message": "REQUEST ERROR"}, status=400)
 
-        page_size = 6
+        page_size = 10
         limit = int(page * page_size)
         offset = int(limit - page_size)
 
@@ -87,7 +87,7 @@ def post_display_all(request, page):
 
         if count_post < offset:
             print("!!!! Post Count Limit !!!! ")
-            return JsonResponse({"message": "POST COUNT LIMIT"}, status=400)
+            return JsonResponse({"message": "POST COUNT LIMIT"}, status=201)
         elif count_post < limit:
             post_list = post[offset:count_post]
         else:
@@ -116,6 +116,34 @@ def post_display_detail(request, post_idx):
 
         serializer = PostDisplayDetailSerializer(post, context={"request": request})
         return JsonResponse(serializer.data, safe=False, status=200)
+    else:
+        return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
+
+
+@authorization_validator_or_none
+def post_display_contest_preview(request):
+    if request.method == "GET":
+        try:
+            max_week = Post.objects.aggregate(Max("week"))["week__max"]
+        except:
+            return JsonResponse({"message": "REQUEST ERROR"}, status=400)
+        try:
+            POST_PREVIEW_COUNT = 4
+            # result = {"max_week": max_week}
+            result = []
+            while max_week:
+                qs = Post.objects.filter(week=max_week).order_by("-likes", "-views")
+                post = qs[:POST_PREVIEW_COUNT]
+                serializer = PostDisplayAllSerializer(
+                    post, context={"request": request}, many=True
+                )
+                # result[f"week_{max_week}"] = serializer.data
+                result.append(serializer.data)
+                max_week -= 1
+
+            return JsonResponse(result, safe=False, status=200)
+        except:
+            return JsonResponse({"message": "GET POST WEEK DATA ERROR"}, status=400)
     else:
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
 
