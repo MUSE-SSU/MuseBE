@@ -191,6 +191,7 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
     is_login_user_liked = serializers.SerializerMethodField()
     is_writer = serializers.SerializerMethodField()
     writer_other_post = serializers.SerializerMethodField()
+    is_login_user_follow = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -204,6 +205,7 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             "views",
             "likes",
             "is_login_user_liked",
+            "is_login_user_follow",
             "is_writer",
             "topic",
             "week",
@@ -214,6 +216,14 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             "comment",
             "writer_other_post",
         )
+
+    def get_is_login_user_follow(self, obj):
+        request = self.context.get("request")
+        if Follow.objects.filter(following=request.user, follower=obj.writer).exists():
+            is_followed = True
+        else:
+            is_followed = False
+        return is_followed
 
     def get_writer_other_post(self, obj):
         try:
