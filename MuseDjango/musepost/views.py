@@ -325,21 +325,12 @@ def comment_delete(request, comment_idx):
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
 
 
-"""
-# 댓글 디스플레이 => 게시물 디테일 디스플레이랑 합쳤음.
-def comment_display(request, post_idx):
+def display_rank(request):
+    """
+    매일 00시에 랭킹 계산(cron.get_rank)
+    badge : 개당 1000점
+    likes : 개당 2점
+    views : 개당 1점
+    """
     if request.method == "GET":
-        try:
-            post = Post.objects.get(idx=post_idx)
-        except:
-            return JsonResponse({"message": "REQUEST ERROR"}, status=401)
-
-        if Comment.objects.filter(post=post).exists():
-            comment_list = Comment.objects.filter(post=post)
-            comments_serialize = CommentDisplaySerializer(comment_list, many=True)
-            return JsonResponse(comments_serialize.data, safe=False, status=200)
-        else:
-            return JsonResponse({"message": "No Comments"}, status=400)
-    else:
-        return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
-"""
+        pass

@@ -39,3 +39,18 @@ def select_muse():
         now_topic.save()
     except:
         print("Error Topic Status")
+
+
+def get_rank():
+    try:
+        BADGE_SCORE=1000
+        LIKES_SCORE=1
+        VIEWS_SCORE=0.2
+        post_qs = Post.objects.values('is_muse', 'likes', 'views')
+        rank = []
+        for post in post_qs:
+            badge_score = post.is_muse * BADGE_SCORE
+            likes_score = post.likes * LIKES_SCORE
+            views_score = post.views * VIEWS_SCORE
+            rank.append(badge_score+likes_score+views_score)
+        
