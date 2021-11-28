@@ -10,7 +10,9 @@ def select_muse():
     try:
         # 뮤즈 선정
         # 좋아요 가장 많이 받은 게시물, 동점의 경우, 조회수 더 많은 게시물
-        muse_post = Post.objects.filter(cur_status=True).order_by('-likes', '-views').first()
+        muse_post = (
+            Post.objects.filter(cur_status=True).order_by("-likes", "-views").first()
+        )
         muse_post.is_muse = True
         # 뮤즈 선정된 유저 뱃지 증가
         muse_post.writer.profile.badge += 1
@@ -43,14 +45,15 @@ def select_muse():
 
 def get_rank():
     try:
-        BADGE_SCORE=1000
-        LIKES_SCORE=1
-        VIEWS_SCORE=0.2
-        post_qs = Post.objects.values('is_muse', 'likes', 'views')
+        BADGE_SCORE = 1000
+        LIKES_SCORE = 1
+        VIEWS_SCORE = 0.2
+        post_qs = Post.objects.values("is_muse", "likes", "views")
         rank = []
         for post in post_qs:
             badge_score = post.is_muse * BADGE_SCORE
             likes_score = post.likes * LIKES_SCORE
             views_score = post.views * VIEWS_SCORE
-            rank.append(badge_score+likes_score+views_score)
-        
+            rank.append(badge_score + likes_score + views_score)
+    except:
+        print("Error get rank")
