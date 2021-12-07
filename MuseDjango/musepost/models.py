@@ -32,6 +32,9 @@ class Post(models.Model):
     topic = models.CharField(max_length=128, verbose_name="주제", null=True, blank=True)
     week = models.IntegerField(default=0, verbose_name="해당 주차", null=True, blank=True)
     hashtag = TaggableManager(blank=True)
+    ref_url = models.CharField(
+        max_length=256, verbose_name="원본 URL", null=True, blank=True
+    )
 
     # 콘테스트 참가 여부 / 현재 상태 / 뮤즈 선정
     is_contest = models.BooleanField(default=True, verbose_name="콘테스트 참가 여부")
