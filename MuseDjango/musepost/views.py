@@ -11,6 +11,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .core import authorization_validator, authorization_validator_or_none
 from .serializers import *
+from rest_framework import status, viewsets
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    pass
 
 
 @authorization_validator
