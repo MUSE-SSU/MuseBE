@@ -4,7 +4,7 @@ import config.asset_storage
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import musepost.utils
+import common.upload_file
 
 
 class Migration(migrations.Migration):
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                     "body_image",
                     models.ImageField(
                         storage=config.asset_storage.PublicMediaStorage(),
-                        upload_to=musepost.utils.upload_post_image,
+                        upload_to=common.upload_file.upload_post_image,
                         verbose_name="작품",
                     ),
                 ),
