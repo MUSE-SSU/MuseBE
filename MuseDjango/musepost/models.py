@@ -22,7 +22,7 @@ class Post(models.Model):
     image = models.ImageField(
         upload_to=upload_post_image, storage=PublicMediaStorage(), verbose_name="작품"
     )
-    content = models.TextField(max_length=300, verbose_name="내용")
+    content = models.TextField(max_length=1000, verbose_name="내용")
 
     views = models.PositiveIntegerField(default=0, verbose_name="조회수")
     likes = models.PositiveIntegerField(default=0, verbose_name="좋아요")
@@ -93,7 +93,7 @@ class Comment(models.Model):
         verbose_name="작성자",
     )
 
-    comment = models.CharField(max_length=128, verbose_name="댓글", default="None")
+    comment = models.CharField(max_length=100, verbose_name="댓글", default="None")
     created_at = models.DateTimeField(verbose_name="최초 업로드 날짜", auto_now_add=True)
     modified_at = models.DateTimeField(verbose_name="최근 수정 날짜", auto_now=True)
 
