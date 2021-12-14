@@ -18,19 +18,48 @@ from rest_framework import status, viewsets
 import random
 
 
-class PostViewSet(viewsets.ModelViewSet):
-    pass
+@authorization_validator
+def post_reference_upload(request):
+    if request.method == "POST":
+        try:
+            upload_type = "reference"
+            ref_url = request.POST.get("ref_url", "")
+            title = request.POST["title"]
+            content = request.POST["content"]
+            image = request.FILES["image"]
+            hashtag = request.POST.get("hashtag", "").strip()
+        except:
+            return JsonResponse({"message": "REQUEST ERROR"}, status=400)
+        if hashtag != "":
+            hashtag = hashtag.split(" ")
+
+        if upload_type == "reference":
+            data = {
+                "writer": request.user,
+                "title": title,
+                "content": content,
+                "image": image,
+                "hashtag": hashtag,
+                "is_contest": False,
+                "cur_status": False,
+                "is_reference": True,
+                "ref_url": ref_url,
+            }
+
+            serializer = PostUploadSerializer(data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse(serializer.data, safe=False, status=200)
+            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=401)
 
 
 @authorization_validator
-def post_upload(request):
-    """
-    게시물 업로드
-    """
+def post_contest_upload(request):
     if request.method == "POST":
         try:
-            upload_type = request.POST.get("upload_type", "contest")
-            ref_url = request.POST.get("ref_url", "")
+            upload_type = "contest"
             title = request.POST["title"]
             content = request.POST["content"]
             image = request.FILES["image"]
@@ -68,26 +97,6 @@ def post_upload(request):
                 serializer.save()
                 return JsonResponse(serializer.data, safe=False, status=200)
             return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        elif upload_type == "reference":
-            data = {
-                "writer": request.user,
-                "title": title,
-                "content": content,
-                "image": image,
-                "hashtag": hashtag,
-                "is_contest": False,
-                "cur_status": False,
-                "is_reference": True,
-                "ref_url": ref_url,
-            }
-
-            serializer = PostUploadSerializer(data=data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return JsonResponse(serializer.data, safe=False, status=200)
-            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     else:
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=401)
 

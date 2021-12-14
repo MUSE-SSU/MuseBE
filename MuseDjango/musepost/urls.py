@@ -3,8 +3,11 @@ from . import views
 
 
 urlpatterns = [
-    path("upload/", views.post_upload, name="upload_post"),
-    path("update/<int:post_idx>/", views.post_update, name="update_post"),
+    path("upload/contest/", views.post_contest_upload, name="post_contest_upload"),
+    path(
+        "upload/reference/", views.post_reference_upload, name="post_reference_upload"
+    ),
+    path("update/<int:post_idx>/", views.post_update, name="post_update"),
     path(
         "display/all/<str:type>/<int:page>/",
         views.post_display_all,
