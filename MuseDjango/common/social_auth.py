@@ -1,11 +1,7 @@
-import datetime
-import os
-import uuid
 from django.http import JsonResponse
 import json
 import requests
 from my_settings import KAKAO_REST_KEY, SECRET_KEY, SECRET_ALGORITHM
-from django.utils import timezone
 
 
 def kakao_login(code, log_method):
@@ -44,20 +40,3 @@ def kakao_login(code, log_method):
     user_name = user_info["properties"]["nickname"]
 
     return user_id, user_name
-
-
-def upload_profile_image(instance, filename):
-    prefix = timezone.now().strftime("%Y/%m/%d")
-    file_name = uuid.uuid4().hex
-    user_id = str(instance)
-    avatar = "avatar"
-    extension = os.path.splitext(filename)[-1].lower()  # 확장자 추출
-    return "/".join(
-        [
-            prefix,
-            user_id,
-            avatar,
-            file_name,
-            extension,
-        ]
-    )

@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.text import slugify
-from .utils import upload_profile_image
+from common.upload_file import upload_profile_image
 from config.asset_storage import PublicMediaStorage
 
 

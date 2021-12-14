@@ -9,7 +9,10 @@ from topics.models import Topic
 from django.db.models import F, Q, Count, Max
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .core import authorization_validator, authorization_validator_or_none
+from common.authentication import (
+    authorization_validator,
+    authorization_validator_or_none,
+)
 from .serializers import *
 from rest_framework import status, viewsets
 

@@ -13,8 +13,11 @@ from rest_framework import status
 from .models import User, UserProfile
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from .utils import kakao_login
-from .core import authorization_validator, authorization_validator_or_none
+from common.social_auth import kakao_login
+from common.authentication import (
+    authorization_validator,
+    authorization_validator_or_none,
+)
 from .serializers import *
 from musepost.models import PostLike
 from musepost.serializers import *

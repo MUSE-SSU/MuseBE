@@ -1,15 +1,12 @@
 from django import db
 from django.db import models
 from accounts.models import User
-from .utils import upload_post_image
-
-# from topics.models import Topic
+from common.upload_file import upload_post_image
 from config.asset_storage import PublicMediaStorage
 from taggit.managers import TaggableManager
 from taggit.models import TagBase, TaggedItemBase
 
 
-# 업로드 게시물(작품)
 class Post(models.Model):
     idx = models.AutoField(primary_key=True, null=False, blank=False)
     writer = models.ForeignKey(
