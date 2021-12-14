@@ -18,6 +18,8 @@ class PostUploadSerializer(TaggitSerializer, serializers.ModelSerializer):
             "week",
             "topic",
             "hashtag",
+            "ref_url",
+            "is_reference",
             "is_contest",
             "cur_status",
         )

@@ -5,7 +5,11 @@ from . import views
 urlpatterns = [
     path("upload/", views.post_upload, name="upload_post"),
     path("update/<int:post_idx>/", views.post_update, name="update_post"),
-    path("display/all/<int:page>/", views.post_display_all, name="display_post_all"),
+    path(
+        "display/all/<str:type>/<int:page>/",
+        views.post_display_all,
+        name="display_post_all",
+    ),
     path(
         "display/detail/<int:post_idx>/",
         views.post_display_detail,

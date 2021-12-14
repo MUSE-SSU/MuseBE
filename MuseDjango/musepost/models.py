@@ -34,7 +34,8 @@ class Post(models.Model):
     )
 
     # 콘테스트 참가 여부 / 현재 상태 / 뮤즈 선정
-    is_contest = models.BooleanField(default=True, verbose_name="콘테스트 참가 여부")
+    is_reference = models.BooleanField(default=False, verbose_name="레퍼런스 게시물")
+    is_contest = models.BooleanField(default=True, verbose_name="콘테스트 게시물")
     cur_status = models.BooleanField(default=True, verbose_name="현재 진행 여부")
     is_muse = models.BooleanField(default=False, verbose_name="MUSE 선정 여부")
 

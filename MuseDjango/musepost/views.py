@@ -28,6 +28,8 @@ def post_upload(request):
     """
     if request.method == "POST":
         try:
+            upload_type = request.POST.get("upload_type", "contest")
+            ref_url = request.POST.get("ref_url", "")
             title = request.POST["title"]
             content = request.POST["content"]
             image = request.FILES["image"]
@@ -38,35 +40,59 @@ def post_upload(request):
         if hashtag != "":
             hashtag = hashtag.split(" ")
 
-        try:
-            cur_contest = Topic.objects.get(activate_week=True)
-            week = cur_contest.week
-            topic = cur_contest.topic
-        except:
-            week = 0
-            topic = "미정"
+        if upload_type == "contest":
+            try:
+                cur_contest = Topic.objects.get(activate_week=True)
+                week = cur_contest.week
+                topic = cur_contest.topic
+            except:
+                week = 0
+                topic = "미정"
 
-        data = {
-            "writer": request.user,
-            "title": title,
-            "content": content,
-            "image": image,
-            "hashtag": hashtag,
-            "week": week,
-            "topic": topic,
-        }
+            data = {
+                "writer": request.user,
+                "title": title,
+                "content": content,
+                "image": image,
+                "hashtag": hashtag,
+                "week": week,
+                "topic": topic,
+                "is_contest": True,
+                "cur_status": True,
+                "is_reference": False,
+            }
 
-        serializer = PostUploadSerializer(data=data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, safe=False, status=200)
-        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer = PostUploadSerializer(data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse(serializer.data, safe=False, status=200)
+            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif upload_type == "reference":
+            data = {
+                "writer": request.user,
+                "title": title,
+                "content": content,
+                "image": image,
+                "hashtag": hashtag,
+                "is_contest": False,
+                "cur_status": False,
+                "is_reference": True,
+                "ref_url": ref_url,
+            }
+
+            serializer = PostUploadSerializer(data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse(serializer.data, safe=False, status=200)
+            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     else:
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=401)
 
 
 @authorization_validator_or_none
-def post_display_all(request, page):
+def post_display_all(request, type, page):
     """
     게시물 보여주기
     무한스크롤: 스크롤이 끝에 닿을 때마다, 인덱스 가져와서 게시물 page_size 개수씩 반환
@@ -80,21 +106,27 @@ def post_display_all(request, page):
         except:
             return JsonResponse({"message": "REQUEST ERROR"}, status=400)
 
+        if type == "contest":
+            qs = Post.objects.filter(is_contest=True)
+        elif type == "reference":
+            qs = Post.objects.filter(is_reference=True)
+        else:
+            return JsonResponse({"message": "REQUEST ERROR"}, status=400)
+
         page_size = 10
         limit = int(page * page_size)
         offset = int(limit - page_size)
 
         if order_by == "recent":
-            post = Post.objects.all().order_by("-created_at")
+            post = qs.order_by("-created_at")
         elif order_by == "views":
-            post = Post.objects.order_by("-views", "-created_at")
+            post = qs.order_by("-views", "-created_at")
         else:  # Default: likes
-            post = Post.objects.order_by("-likes", "-created_at")
+            post = qs.order_by("-likes", "-created_at")
 
         count_post = post.count()
 
         if count_post < offset:
-            print("!!!! Post Count Limit !!!! ")
             return JsonResponse({"message": "POST COUNT LIMIT"}, status=201)
         elif count_post < limit:
             post_list = post[offset:count_post]
