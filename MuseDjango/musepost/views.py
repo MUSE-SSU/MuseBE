@@ -15,6 +15,7 @@ from common.authentication import (
 )
 from .serializers import *
 from rest_framework import status, viewsets
+import random
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -213,8 +214,8 @@ def contest_section(request):
                     qs, context={"request": request}, many=True
                 )
             return JsonResponse(serializer.data, safe=False, status=200)
-        except:
-            return JsonResponse({"message": "GET POST WEEK DATA ERROR"}, status=400)
+        except Exception as e:
+            return JsonResponse({"message": e}, status=400)
     else:
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
 
@@ -224,15 +225,14 @@ def reference_section(request):
     if request.method == "GET":
         try:
             # 레퍼런스 4개 preview
-            qs = Post.objects.filter(is_reference=True).order_by(
-                "-likes", "-created_at"
-            )
+            qs = list(Post.objects.filter(is_reference=True))
         except:
             return JsonResponse({"message": "REQUEST ERROR"}, status=400)
         try:
             POST_PREVIEW_COUNT = 4
-            if qs.count() >= POST_PREVIEW_COUNT:
-                post = qs[:POST_PREVIEW_COUNT]
+            if len(qs) > POST_PREVIEW_COUNT:
+                post = random.sample(qs, POST_PREVIEW_COUNT)
+                # post = qs[:POST_PREVIEW_COUNT]
                 serializer = PostDisplayAllSerializer(
                     post, context={"request": request}, many=True
                 )
@@ -241,8 +241,8 @@ def reference_section(request):
                     qs, context={"request": request}, many=True
                 )
             return JsonResponse(serializer.data, safe=False, status=200)
-        except:
-            return JsonResponse({"message": "GET POST WEEK DATA ERROR"}, status=400)
+        except Exception as e:
+            return JsonResponse({"message": e}, status=400)
     else:
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
 
