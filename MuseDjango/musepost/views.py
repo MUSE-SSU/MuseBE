@@ -106,8 +106,10 @@ def post_display_all(request, type, page):
         except:
             return JsonResponse({"message": "REQUEST ERROR"}, status=400)
 
-        if type == "contest":
-            qs = Post.objects.filter(is_contest=True)
+        if type == "cur-contest":
+            qs = Post.objects.filter(is_contest=True, cur_status=True)
+        elif type == "past-contest":
+            qs = Post.objects.filter(is_contest=True, cur_status=False)
         elif type == "reference":
             qs = Post.objects.filter(is_reference=True)
         else:
