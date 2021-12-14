@@ -204,6 +204,7 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             "title",
             "image",
             "content",
+            "ref_url",
             "views",
             "likes",
             "is_login_user_liked",

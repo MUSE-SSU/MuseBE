@@ -16,9 +16,14 @@ urlpatterns = [
         name="display_post_detail",
     ),
     path(
-        "display/contest/preview/",
-        views.post_display_contest_preview,
-        name="display_post_contest_topic_preview",
+        "display/preview/contest/",
+        views.contest_section,
+        name="display_main_contest_section",
+    ),
+    path(
+        "display/preview/reference/",
+        views.reference_section,
+        name="display_main_reference_section",
     ),
     path(
         "display/contest/",
