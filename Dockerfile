@@ -69,6 +69,9 @@ COPY $DOCKER_SRC/topics $DOCKER_SRVPROJ/topics
 EXPOSE 8080
 WORKDIR $DOCKER_SRVPROJ
 
+#COPY ./docker-entrypoint.sh /
+#ENTRYPOINT ["/docker-entrypoint.sh"]
+
 ENTRYPOINT ["python3", "manage.py", "runserver", "0.0.0.0:8080"]
 
 # ENTRYPOINT ["./entrypoint.sh"]
