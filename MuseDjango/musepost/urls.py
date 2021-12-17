@@ -9,7 +9,7 @@ urlpatterns = [
     ),
     path("update/<int:post_idx>/", views.post_update, name="post-update"),
     path(
-        "display/all/<str:type>/<int:page>/",
+        "display/all/",
         views.post_display_all,
         name="display-post-all-by-type",
     ),

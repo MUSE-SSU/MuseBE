@@ -102,30 +102,33 @@ def post_contest_upload(request):
 
 
 @authorization_validator_or_none
-def post_display_all(request, type, page):
+def post_display_all(request):
     """
     게시물 보여주기
     무한스크롤: 스크롤이 끝에 닿을 때마다, 인덱스 가져와서 게시물 page_size 개수씩 반환
     정렬: 좋아요순(디폴트), 조회수순, 최신순
     """
     if request.method == "GET":
-        if page is None:
-            page = 1
         try:
+            post_type = request.GET.get("type", None)
+            page = int(request.GET.get("page", None))
             order_by = request.GET.get("order", "likes")
         except:
             return JsonResponse({"message": "REQUEST ERROR"}, status=400)
 
-        if type == "cur-contest":
+        if page == None or post_type == None:
+            return JsonResponse({"message": "REQUEST ERROR"}, status=400)
+
+        if post_type == "cur-contest":
             qs = Post.objects.filter(is_contest=True, cur_status=True)
-        elif type == "past-contest":
+        elif post_type == "past-contest":
             qs = Post.objects.filter(is_contest=True, cur_status=False)
-        elif type == "reference":
+        elif post_type == "reference":
             qs = Post.objects.filter(is_reference=True)
         else:
             return JsonResponse({"message": "REQUEST ERROR"}, status=400)
 
-        page_size = 10
+        page_size = 8
         limit = int(page * page_size)
         offset = int(limit - page_size)
 
