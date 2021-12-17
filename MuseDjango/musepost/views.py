@@ -111,9 +111,12 @@ def post_display_all(request):
     if request.method == "GET":
         try:
             post_type = request.GET.get("type", None)
-            page = request.GET.get("page", 1)
+            page = int(request.GET.get("page", None))
             order_by = request.GET.get("order", "likes")
         except:
+            return JsonResponse({"message": "REQUEST ERROR"}, status=400)
+
+        if page == None or post_type == None:
             return JsonResponse({"message": "REQUEST ERROR"}, status=400)
 
         if post_type == "cur-contest":
