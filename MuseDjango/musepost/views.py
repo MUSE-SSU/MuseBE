@@ -125,7 +125,7 @@ def post_display_all(request, type, page):
         else:
             return JsonResponse({"message": "REQUEST ERROR"}, status=400)
 
-        page_size = 10
+        page_size = 8
         limit = int(page * page_size)
         offset = int(limit - page_size)
 
