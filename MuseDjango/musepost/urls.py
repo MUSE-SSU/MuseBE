@@ -18,6 +18,7 @@ urlpatterns = [
         views.post_display_detail,
         name="display-post-detail",
     ),
+    path("display/preview/muse/", views.muse_section, name="display-main-muse-section"),
     path(
         "display/preview/contest/",
         views.contest_section,

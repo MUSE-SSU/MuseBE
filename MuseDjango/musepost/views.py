@@ -205,6 +205,32 @@ def post_display_contest_preview(request):
 
 
 @authorization_validator_or_none
+def muse_section(request):
+    if request.method == "GET":
+        """
+        메인: 뮤즈 섹션
+        - 작가이름, 프로필사진, 작품 이미지, 좋아요개수, 조회수개수,
+        """
+        try:
+            cur_contest = Topic.objects.get(activate_week=True)
+            past_contest_week = cur_contest.week - 1
+            past_contest_muse = Post.objects.filter(
+                week=past_contest_week, is_muse=True
+            )[0]
+            print(past_contest_muse)
+        except:
+            return JsonResponse({"message": "REQUEST ERROR"}, status=400)
+
+        serializer = PostDisplayDetailSerializer(
+            past_contest_muse, context={"request": request}
+        )
+        return JsonResponse(serializer.data, safe=False, status=200)
+
+    else:
+        return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
+
+
+@authorization_validator_or_none
 def contest_section(request):
     if request.method == "GET":
         try:
