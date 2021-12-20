@@ -5,6 +5,28 @@ from django.core.exceptions import ObjectDoesNotExist
 from accounts.models import User
 from django.http import JsonResponse
 from my_settings import SECRET_KEY, SECRET_ALGORITHM
+from rest_framework import authentication, exceptions
+
+
+class MUSEAuthenticationForWeb(authentication.BaseAuthentication):
+    def authenticate(self, request):
+        if "Authorization" not in request.headers:
+            return None
+        else:
+            try:
+                auth_header = request.headers.get("Authorization", None)
+                payload = jwt.decode(
+                    auth_header, SECRET_KEY, algorithms=SECRET_ALGORITHM
+                )
+                user_id = payload["user_id"]
+                login_user = User.objects.get(user_id=user_id)
+
+                return (login_user, None)
+
+            except jwt.exceptions.DecodeError:
+                return JsonResponse({"message": "INVALID_TOKEN"}, status=401)
+            except User.DoesNotExist:
+                return JsonResponse({"message": "INVALID_USER"}, status=400)
 
 
 def authorization_validator(func):
