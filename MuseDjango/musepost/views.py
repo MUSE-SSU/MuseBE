@@ -1,21 +1,331 @@
+from re import L
 from django.shortcuts import get_object_or_404
 import json
 import requests
 from django.http import JsonResponse
-from rest_framework import status
+from rest_framework import status, viewsets
+from rest_framework.decorators import action, permission_classes
 from accounts.models import User
 from .models import *
 from topics.models import Topic
 from django.db.models import F, Q, Count, Max
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import status, viewsets
 from common.authentication import (
     authorization_validator,
     authorization_validator_or_none,
+    MUSEAuthenticationForWeb,
 )
 from .serializers import *
-from rest_framework import status, viewsets
 import random
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    """게시글 API 종합"""
+
+    authentication_classes = [MUSEAuthenticationForWeb]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def create(self, request):
+        # POST host/post/
+        try:
+            upload_type = request.data.get("type", None)
+            title = request.data.get("title", None)
+            content = request.data.get("content", None)
+            image = request.data.get("image", None)
+            hashtag = request.data.get("hashtag", None)
+            ref_url = request.data.get("ref_url", None)
+        except:
+            return Response({"message": "ERROR: POST CREATE > REQUEST"}, status=400)
+        try:
+            if hashtag:
+                hashtag = hashtag.strip().split(" ")
+
+            if upload_type == "reference":
+                data = {
+                    "writer": request.user,
+                    "title": title,
+                    "content": content,
+                    "image": image,
+                    "hashtag": hashtag,
+                    "is_contest": False,
+                    "cur_status": False,
+                    "is_reference": True,
+                    "ref_url": ref_url,
+                }
+
+            elif upload_type == "contest":
+                try:
+                    cur_contest = Topic.objects.get(activate_week=True)
+                    week = cur_contest.week
+                    topic = cur_contest.topic
+                except:
+                    week = 0
+                    topic = "미정"
+
+                data = {
+                    "writer": request.user,
+                    "title": title,
+                    "content": content,
+                    "image": image,
+                    "hashtag": hashtag,
+                    "week": week,
+                    "topic": topic,
+                    "is_contest": True,
+                    "cur_status": True,
+                    "is_reference": False,
+                }
+
+            serializer = PostUploadSerializer(data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"message": "SUCCESS"}, status=200)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"message": "ERROR: POST CREATE"}, status=400)
+
+    def list(self, request):
+        # GET host/post/?type=reference&page=1&order_by=likes
+        try:
+            post_type = request.query_params.get("type", None)
+            page = int(request.query_params.get("page", None))
+            order_by = request.query_params.get("order", "likes")
+        except:
+            return Response({"message": "ERROR: POST LIST > REQUEST"}, status=400)
+
+        if not page or not post_type:
+            return Response({"message": "ERROR: POST LIST > REQUEST"}, status=400)
+        try:
+            if post_type == "cur-contest":
+                qs = Post.objects.filter(is_contest=True, cur_status=True)
+            elif post_type == "past-contest":
+                qs = Post.objects.filter(is_contest=True, cur_status=False)
+            elif post_type == "reference":
+                qs = Post.objects.filter(is_reference=True)
+            else:
+                return Response({"message": "REQUEST ERROR"}, status=400)
+
+            page_size = 8
+            limit = int(page * page_size)
+            offset = int(limit - page_size)
+
+            if order_by == "recent":
+                post = qs.order_by("-created_at")
+            elif order_by == "views":
+                post = qs.order_by("-views", "-created_at")
+            else:  # Default: likes
+                post = qs.order_by("-likes", "-created_at")
+
+            count_post = post.count()
+
+            if count_post < offset:
+                return Response({"message": "POST COUNT LIMIT"}, status=201)
+            elif count_post < limit:
+                post_list = post[offset:count_post]
+            else:
+                post_list = post[offset:limit]
+
+            serializer = PostDisplayAllSerializer(
+                post_list, context={"request": request}, many=True
+            )
+            return Response(serializer.data, status=200)
+        except:
+            return Response({"message": "ERROR: POST LIST"}, status=400)
+
+    def retrieve(self, request, pk=None):
+        # GET host/post/pk
+        try:
+            post = Post.objects.get(idx=pk)
+            post.views += 1
+            post.save()
+            serializer = PostDisplayDetailSerializer(post, context={"request": request})
+            return Response(serializer.data, status=200)
+        except:
+            return Response({"message": "ERROR: POST RETRIEVE"}, status=400)
+
+    def partial_update(self, request, pk=None):
+        # PATCH host/post/pk
+        try:
+            title = request.data.get("title", None)
+            content = request.data.get("content", None)
+            image = request.data.get("image", None)
+            hashtag = request.data.get("hashtag", None)
+            ref_url = request.data.get("ref_url", None)
+        except:
+            return Response({"message": "ERROR: POST UPDATE > REQUEST"}, status=400)
+
+        if hashtag:
+            hashtag = hashtag.split().split(" ")
+        try:
+            if Post.objects.filter(idx=pk, writer=request.user).exists():
+                post = Post.objects.get(idx=pk)
+                if title:
+                    post.title = title
+                if content:
+                    post.content = content
+                if image:
+                    post.image = image
+                if hashtag:
+                    post.hashtag = hashtag
+                if ref_url:
+                    post.ref_url = ref_url
+                post.save()
+                return Response({"message": "SUCCESS"}, status=200)
+        except:
+            return Response({"message": "ERROR: POST UPDATE"}, status=400)
+
+    def destroy(self, request, pk=None):
+        # DELETE host/post/pk/
+        try:
+            if Post.objects.filter(idx=pk, writer=request.user).exists():
+                post = Post.objects.get(idx=pk)
+                post.delete()
+        except:
+            return Response({"message": "ERROR: POST DELETE"}, status=400)
+        return Response({"message": "POST DELETE SUCCESS"}, status=200)
+
+    @action(detail=False, methods=["get"])
+    def preview_contest(self, request):
+        # GET host/post/preview_contest
+        # 현재 진행 중인 콘테스트 4개 preview
+        try:
+            qs = Post.objects.filter(is_contest=True, cur_status=True).order_by(
+                "-likes", "-created_at"
+            )
+            POST_PREVIEW_COUNT = 4
+            if qs.count() >= POST_PREVIEW_COUNT:
+                post = qs[:POST_PREVIEW_COUNT]
+                serializer = PostDisplayAllSerializer(
+                    post, context={"request": request}, many=True
+                )
+            else:
+                serializer = PostDisplayAllSerializer(
+                    qs, context={"request": request}, many=True
+                )
+            return Response(serializer.data, status=200)
+        except:
+            return Response({"message": "ERROR: PREVIEW CONTEST"}, status=400)
+
+    @action(detail=False, methods=["get"])
+    def preview_reference(self, request):
+        # GET host/post/preview_reference
+        # 레퍼런스 4개 무작위 preview
+        try:
+            qs = list(Post.objects.filter(is_reference=True))
+            POST_PREVIEW_COUNT = 4
+            if len(qs) > POST_PREVIEW_COUNT:
+                post = random.sample(qs, POST_PREVIEW_COUNT)
+                serializer = PostDisplayAllSerializer(
+                    post, context={"request": request}, many=True
+                )
+            else:
+                serializer = PostDisplayAllSerializer(
+                    qs, context={"request": request}, many=True
+                )
+            return Response(serializer.data, status=200)
+        except:
+            return Response({"message": "ERROR: PREVIEW REFERENCE"}, status=400)
+
+    @action(detail=False, methods=["get"])
+    def preview_muse(self, request):
+        # GET host/post/preview_muse
+        try:
+            cur_contest = Topic.objects.get(activate_week=True)
+            past_contest_week = cur_contest.week - 1
+            past_contest_muse = Post.objects.filter(
+                week=past_contest_week, is_muse=True
+            ).first()
+            serializer = PostDisplayDetailSerializer(
+                past_contest_muse, context={"request": request}
+            )
+            return Response(serializer.data, status=200)
+        except:
+            return Response({"message": "ERROR: PREVIEW MUSE"}, status=400)
+
+    @action(detail=False, methods=["get"])
+    def list_muse(self, request):
+        # GET host/post/list_muse
+        # muse 선정된 게시물, 최신 주차별로 정렬
+        try:
+            post = Post.objects.filter(is_muse=True).order_by("-week", "-created_at")
+            serializer = PostDisplayAllSerializer(
+                post, context={"request": request}, many=True
+            )
+            return Response(serializer.data, status=200)
+        except:
+            return Response({"message": "ERROR: LIST MUSE"}, status=400)
+
+    @action(detail=True, methods=["post"])
+    def like(self, request, pk=None):
+        # POST host/post/pk/like/
+        try:
+            post = Post.objects.get(idx=pk)
+            user = User.objects.get(user_id=request.user.user_id)
+            like, is_liked = PostLike.objects.get_or_create(post=post, like_user=user)
+            if not is_liked:
+                like.delete()
+                result = False
+                post.likes -= 1
+                post.save()
+            else:
+                result = True
+                post.likes += 1
+                post.save()
+            return Response({"is_press_like": result}, status=200)
+        except:
+            return Response({"message": "ERROR: POST LIKE"}, status=401)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+
+    authentication_classes = [MUSEAuthenticationForWeb]
+
+    def create(self, request):
+        # POST host/comment/
+        try:
+            comment = request.data.get("comment", None)
+            post_idx = request.data.get("post_idx", None)
+            if not comment or not post_idx:
+                return Response(
+                    {"message": "ERROR: COMMENT CREATE > REQUEST"}, status=400
+                )
+
+            data = {"post": post_idx, "writer": request.user, "comment": comment}
+            serializer = CommentUploadSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=200)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"message": "ERROR: COMMENT CREATE"}, status=400)
+
+    def destroy(self, request, pk=None):
+        # DELETE host/comment/pk/
+        try:
+            if Comment.objects.filter(idx=pk, writer=request.user).exists():
+                Comment.objects.get(idx=pk).delete()
+                return Response({"message": " SUCCESS"}, status=200)
+            else:
+                return Response({"message": "ERROR: COMMENT DELETE > NONE"}, status=400)
+        except:
+            return Response({"message": "ERROR: COMMENT DELETE"}, status=401)
+
+    def partial_update(self, request, pk=None):
+        # PATCH host/comment/pk/
+        try:
+            comment = request.data.get("comment", None)
+
+            if Comment.objects.filter(idx=pk, writer=request.user):
+                obj = Comment.objects.get(idx=pk, writer=request.user)
+                obj.comment = comment
+                obj.save()
+                return Response({"message": "SUCCESS"}, status=200)
+            else:
+                return Response({"message": "UNAUTHORIZED"}, status=401)
+        except:
+            return Response({"message": "REQUEST ERROR"}, status=400)
 
 
 @authorization_validator
@@ -372,12 +682,6 @@ def post_delete(request, post_idx):
         return JsonResponse({"message": "DELETE SUCCESS"}, status=200)
     else:
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
-
-
-def post_view_up(post_id):
-    post = get_object_or_404(Post, idx=post_id)
-    post.views += 1
-    post.save()
 
 
 @authorization_validator

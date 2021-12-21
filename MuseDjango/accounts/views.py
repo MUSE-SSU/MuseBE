@@ -9,7 +9,7 @@ from my_settings import (
     SECRET_KEY,
     SECRET_ALGORITHM,
 )
-from rest_framework import status
+from rest_framework import status, viewsets
 from .models import User, UserProfile
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -17,6 +17,7 @@ from common.social_auth import kakao_login
 from common.authentication import (
     authorization_validator,
     authorization_validator_or_none,
+    MUSEAuthenticationForWeb,
 )
 from .serializers import *
 from musepost.models import PostLike
