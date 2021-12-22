@@ -24,10 +24,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("username", "nickname", "self_introduce", "avatar", "badge")
-
-    def get_self_introduce(self, obj):
-        return obj.profile.self_introduce
+        fields = ("username", "nickname", "avatar", "badge", "self_introduce")
 
     def get_avatar(self, obj):
         if not obj.profile.avatar:
@@ -36,6 +33,9 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     def get_badge(self, obj):
         return obj.profile.badge
+
+    def get_self_introduce(self, obj):
+        return obj.profile.self_introduce
 
 
 """
