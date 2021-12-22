@@ -15,7 +15,7 @@ exec gunicorn config.wsgi:application \
         --name muse \
         --bind 0.0.0.0:8000 \
         --workers 4 \
-        --timeout 300 &
+        --timeout 300
 
 echo "-----Nginx Start-----"
 exec service nginx start
