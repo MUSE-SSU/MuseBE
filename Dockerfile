@@ -30,11 +30,10 @@ RUN apt-get install -y mysql-server
 RUN apt-get install -y libmysqlclient-dev
 RUN apt-get install -y git
 RUN apt-get install -y vim
+RUN pip3 install gunicorn
 RUN apt-get install -y nginx
 RUN apt-get install --reinstall -y systemd
 RUN apt-get install -y cron
-#ffmpeg
-RUN apt-get install -y ffmpeg
 
 #locale
 RUN apt-get install -y language-pack-ko
@@ -66,13 +65,17 @@ COPY $DOCKER_SRC/topics $DOCKER_SRVPROJ/topics
 
 # EXPOSE: 네트워크 상에서 컨테이너로 들어오는 트래픽 리스닝하는 포트와 프로토콜 지정.
 # 프로토콜 지정 안하면 기본값 TCP
-EXPOSE 8080
+EXPOSE 8000
 WORKDIR $DOCKER_SRVPROJ
+COPY ./docker-entrypoint.sh /
+
+RUN ["chmod", "+x", "/docker-entrypoint.sh"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
 
 #COPY ./docker-entrypoint.sh /
 #ENTRYPOINT ["/docker-entrypoint.sh"]
 
-ENTRYPOINT ["python3", "manage.py", "runserver", "0.0.0.0:8080"]
+# CMD ["gunicorn", "--bind", "0:8080", "config.wsgi:application"]
 
 # ENTRYPOINT ["./entrypoint.sh"]
 # CMD python3 manage.py runserver 0.0.0.0:8080
