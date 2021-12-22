@@ -11,7 +11,7 @@ from rest_framework import authentication, exceptions
 class MUSEAuthenticationForWeb(authentication.BaseAuthentication):
     def authenticate(self, request):
         if "Authorization" not in request.headers:
-            return None
+            return (None, None)
         else:
             try:
                 auth_header = request.headers.get("Authorization", None)

@@ -33,6 +33,7 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def create(self, request):
+        # POST host/account/
         """회원가입&로그인"""
         try:
             create_type = request.data.get("type", None)
@@ -93,13 +94,17 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({"message": "ERROR: USER CREATE"}, status=400)
 
     def list(self, request):
+        # GET host/account/
         try:
-            serializer = UserInfoSerializer(request.user, context={"request": request})
+            if not request.user:
+                return Response({"message": "ERROR: USER RETRIEVE > NONE"}, status=400)
+            serializer = UserInfoSerializer(request.user)
         except:
             return Response({"message": "ERROR: USER RETRIEVE"}, status=400)
         return Response(serializer.data, status=200)
 
     def partial_update(self, request, pk=None):
+        # PATCH host/account/pk
         try:
             nickname = request.data.get("nickname", None)
             self_introduce = request.data.get("self_introduce", "")
@@ -108,7 +113,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({"message": "ERROR: USER UPDATE > REQUEST"}, status=400)
 
         try:
-            if User.objects.filter(user_id=request.user).exists():
+            if User.objects.filter(user_id=request.user, nickname=pk).exists():
                 request.user.nickname = nickname
                 request.user.profile.avatar = avatar
                 request.user.profile.self_introduce = self_introduce
@@ -126,16 +131,10 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, pk=None):
         pass
-        # try:
-        #     if User.objects.filter(nickname=request.user).exists():
-        #         user = User.objects.get(nickname=request.user)
-        #         user.delete()
-        # except:
-        #     return Response({"message": "ERROR: USER DELETE"}, status=400)
-        # return Response({"message": "USER DELETE SUCCESS"}, status=400)
 
     @action(detail=False, methods=["post"])
     def check_nickname(self, request):
+        # POST host/account/check_nickname
         try:
             checking = request.data.get("nickname", None)
             if (
@@ -151,6 +150,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"])
     def follow(self, request):
+        # POST host/account/follow/
         try:
             follower_nickname = request.data.get("follower", None)
             following_id = request.user.user_id
@@ -183,6 +183,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def my_page(self, request, pk=None):
+        # GET host/account/my_page/pk
         try:
             owner = User.objects.get(nickname=pk)
             serializer = MyPageSerializer(owner, context={"request": request})
@@ -192,6 +193,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def owner_post(self, request, pk=None):
+        # GET host/account/owner_post/pk
         try:
             owner = User.objects.get(nickname=pk)
             owner_post = Post.objects.filter(writer=owner).order_by("-created_at")
@@ -204,6 +206,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def owner_liked_post(self, request, pk=None):
+        # GET host/account/owner_liked_post/pk
         try:
             owner_liked_post = Post.objects.filter(
                 post_like__like_user=request.user
