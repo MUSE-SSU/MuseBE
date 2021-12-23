@@ -1,13 +1,26 @@
 version: '3'
+services: 
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes: 
+      - .:/srv #현재 위치와 /srv(django 어플리케이션이 있는 위치) 
+      - ./nginx:/etc/nginx/conf.d #nginx 설정파일이 있는 위치
+    depends_on:
+      - muse
 
-services:
-    muse:
-        build:
-            context: .
-            dockerfile: ./Dockerfile
-            args:
-                STAGE: DEV
-        ports:
-            - 8080:8080
-        tty: true
-        platform: linux/amd64
+  muse:
+    container_name: muse
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        STAGE: DEV
+    #volumes: #디렉토리 연결
+    #  - ./MuseDjango:/srv/MuseDjango/
+    ports:
+      - "8000:8000"
+    tty: true
+    platform: linux/amd64 # mac M1 local 에서만

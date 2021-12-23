@@ -10,6 +10,9 @@ from my_settings import (
     SECRET_ALGORITHM,
 )
 from rest_framework import status, viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework.decorators import action
 from .models import User, UserProfile
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -20,8 +23,201 @@ from common.authentication import (
     MUSEAuthenticationForWeb,
 )
 from .serializers import *
-from musepost.models import PostLike
 from musepost.serializers import *
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """User API"""
+
+    authentication_classed = [MUSEAuthenticationForWeb]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def create(self, request):
+        # POST host/account/
+        """회원가입&로그인"""
+        try:
+            create_type = request.data.get("type", None)
+            code = request.data.get("code", None)
+            if not code or not create_type:
+                return Response({"message": "ERROR: USER CREATE > REQUEST"}, status=400)
+        except:
+            return Response({"message": "ERROR: USER CREATE > REQUEST"}, status=400)
+        try:
+            user_id, user_name = kakao_login(code, KAKAO_REGISTER_REDIRECT_URI)
+        except:
+            return Response({"message": "ERROR: USER CREATE > "}, status=400)
+        try:
+            if create_type == "register":
+                # DB에 존재하면 로그인하라고 반환.
+                if User.objects.filter(user_id=user_id).exists():
+                    return Response({"result": False}, status=400)
+
+                # DB에 없으면 회원가입 후 로그인 성공
+                else:
+                    serializer = UserSerializer(
+                        data={
+                            "user_id": user_id,
+                            "username": user_name,
+                            "nickname": user_name,
+                        },
+                        partial=True,
+                    )
+                    if serializer.is_valid():
+                        created_user = serializer.save()
+                        created_profile = UserProfile.objects.create(
+                            user=created_user, avatar="default_avatar.png"
+                        )
+                        created_profile.save()
+
+                        encoded_token = jwt.encode(
+                            {"user_id": user_id}, SECRET_KEY, algorithm=SECRET_ALGORITHM
+                        )
+
+                        return Response(
+                            {"result": True, "token": encoded_token}, status=201
+                        )
+                    return Response(serializer.errors, status=400)
+            elif create_type == "login":
+                # DB에 있는 유저면, 로그인 성공
+                if User.objects.filter(user_id=user_id).exists():
+                    encoded_token = jwt.encode(
+                        {"user_id": user_id}, SECRET_KEY, algorithm=SECRET_ALGORITHM
+                    )
+                    return Response(
+                        {"result": True, "token": encoded_token}, status=200
+                    )
+
+                # DB에 없으면, 회원가입부터 하라고 반환
+                else:
+                    return Response({"result": False}, status=400)
+        except:
+            return Response({"message": "ERROR: USER CREATE"}, status=400)
+
+    def list(self, request):
+        # GET host/account/
+        try:
+            if not request.user:
+                return Response({"message": "ERROR: USER RETRIEVE > NONE"}, status=400)
+            serializer = UserInfoSerializer(request.user)
+        except:
+            return Response({"message": "ERROR: USER RETRIEVE"}, status=400)
+        return Response(serializer.data, status=200)
+
+    def partial_update(self, request, pk=None):
+        # PATCH host/account/pk
+        try:
+            nickname = request.data.get("nickname", None)
+            self_introduce = request.data.get("self_introduce", "")
+            avatar = request.data.get("avatar", None)
+        except:
+            return Response({"message": "ERROR: USER UPDATE > REQUEST"}, status=400)
+
+        try:
+            if User.objects.filter(user_id=request.user, nickname=pk).exists():
+                request.user.nickname = nickname
+                request.user.profile.avatar = avatar
+                request.user.profile.self_introduce = self_introduce
+
+                request.user.save()
+                request.user.profile.save()
+                return Response({"message": "SUCCESS"}, status=200)
+            else:
+                return JsonResponse({"message": "ERROR: USER UPDATE"}, status=400)
+        except:
+            return JsonResponse({"message": "ERROR: USER UPDATE"}, status=400)
+
+    def retrieve(self, request, pk=None):
+        pass
+
+    def destroy(self, request, pk=None):
+        pass
+
+    @action(detail=False, methods=["post"])
+    def check_nickname(self, request):
+        # POST host/account/check_nickname
+        try:
+            checking = request.data.get("nickname", None)
+            if (
+                User.objects.filter(nickname=checking)
+                .exclude(user_id=request.user.user_id)
+                .exists()
+            ):
+                return Response({"result": False}, status=200)
+            else:
+                return Response({"result": True}, status=200)
+        except:
+            return Response({"message": "ERROR: USER CHECK NICKNAME"}, status=400)
+
+    @action(detail=False, methods=["post"])
+    def follow(self, request):
+        # POST host/account/follow/
+        try:
+            follower_nickname = request.data.get("follower", None)
+            following_id = request.user.user_id
+        except:
+            return Response({"message": "ERROR: USER FOLLOW > REQUEST"}, status=400)
+        try:
+            if (
+                User.objects.filter(nickname=follower_nickname).exists()
+                and User.objects.filter(user_id=following_id).exists()
+            ):
+                follower = User.objects.get(nickname=follower_nickname)
+                following = User.objects.get(user_id=following_id)
+
+                if follower == following:  # 자기 자신 누르는 경우
+                    return Response(
+                        {"message": "ERROR: USER FOLLOW > SELF FOLLOW"}, status=400
+                    )
+
+                follows, is_followed = Follow.objects.get_or_create(
+                    following=following, follower=follower
+                )
+                if not is_followed:
+                    follows.delete()
+                    result = False
+                else:
+                    result = True
+                return Response({"message": result}, status=200)
+        except:
+            return Response({"message": "ERROR: USER FOLLOW"}, status=400)
+
+    @action(detail=True, methods=["get"])
+    def my_page(self, request, pk=None):
+        # GET host/account/my_page/pk
+        try:
+            owner = User.objects.get(nickname=pk)
+            serializer = MyPageSerializer(owner, context={"request": request})
+        except:
+            return Response({"message": "ERROR: MY PAGE"}, status=400)
+        return Response(serializer.data, status=200)
+
+    @action(detail=True, methods=["get"])
+    def owner_post(self, request, pk=None):
+        # GET host/account/owner_post/pk
+        try:
+            owner = User.objects.get(nickname=pk)
+            owner_post = Post.objects.filter(writer=owner).order_by("-created_at")
+            serializer = PostDisplayAllSerializer(
+                owner_post, context={"request": request}, many=True
+            )
+            return Response(serializer.data, safe=False, status=200)
+        except:
+            return Response({"message": "ERROR: OWNER POST"}, status=400)
+
+    @action(detail=True, methods=["get"])
+    def owner_liked_post(self, request, pk=None):
+        # GET host/account/owner_liked_post/pk
+        try:
+            owner_liked_post = Post.objects.filter(
+                post_like__like_user=request.user
+            ).order_by("-created_at")
+            if User.objects.get(nickname=pk) == request.user:
+                serializer = PostDisplayAllSerializer(
+                    owner_liked_post, context={"request": request}, many=True
+                )
+                return Response(serializer.data, status=200)
+        except:
+            return Response({"message": "ERROR: OWNER LIKED POST"}, status=400)
 
 
 def register(request):
@@ -132,12 +328,12 @@ def get_user_info(request):
     """
     if request.method == "GET":
         try:
-            serializer = UserInfoSerializer(request.user, context={"request": request})
+            serializer = UserInfoSerializer(request.user)
         except Exception as e:
             return JsonResponse({"message": e}, status=400)
-        return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     else:
-        return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
+        return Response({"message": "ACCESS METHOD ERROR"}, status=400)
 
 
 @authorization_validator
@@ -216,38 +412,6 @@ def update_userinfo(request):
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
 
 
-'''
-@authorization_validator
-def update_nickname(request):
-    """
-    유저 닉네임 변경
-    """
-    if request.method == "POST":
-        serializer = UserNicknameSerializer(request.user, data=json.loads(request.body))
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
-        return JsonResponse(serializer.errors, status=400)
-    else:
-        return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
-
-
-@authorization_validator
-def update_avatar(request):
-    """
-    프사 업로드/업데이트
-    """
-    if request.method == "POST":
-        serializer = AvatarSerializer(request.user.profile, data=request.FILES)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
-        return JsonResponse(serializer.errors, status=400)
-    else:
-        return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
-'''
-
-
 @authorization_validator
 def follow(request):
     if request.method == "POST":
@@ -285,6 +449,7 @@ def follow(request):
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
 
 
+"""
 @authorization_validator
 def following_list(request):
     # 내가 누른 사람들 -> 팔로잉
@@ -317,6 +482,7 @@ def follower_list(request):
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     else:
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
+"""
 
 
 @authorization_validator_or_none

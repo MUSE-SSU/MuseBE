@@ -4,7 +4,7 @@ import json
 import requests
 from django.http import JsonResponse
 from rest_framework import status, viewsets
-from rest_framework.decorators import action, permission_classes
+from rest_framework.decorators import action
 from accounts.models import User
 from .models import *
 from topics.models import Topic
@@ -23,7 +23,7 @@ import random
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    """게시글 API 종합"""
+    """Post API"""
 
     authentication_classes = [MUSEAuthenticationForWeb]
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -138,6 +138,9 @@ class PostViewSet(viewsets.ModelViewSet):
         # GET host/post/pk
         try:
             post = Post.objects.get(idx=pk)
+        except:
+            return Response({"message": "ERROR: POST RETRIEVE > NONE"}, status=400)
+        try:
             post.views += 1
             post.save()
             serializer = PostDisplayDetailSerializer(post, context={"request": request})
@@ -473,7 +476,7 @@ def post_display_detail(request, post_idx):
     """
     if request.method == "GET":
         # 조회수 증가
-        post_view_up(post_idx)
+        # post_view_up(post_idx)
         try:
             post = Post.objects.get(idx=post_idx)
         except:
