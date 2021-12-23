@@ -1,25 +1,26 @@
-version: '3' #docker-compose 버전을 나타냄
+version: '3'
 services: 
   nginx:
-    image: nginx:latest #베이스 이미지가 nginx:latest
-    ports: #해당 컨테이너의 포트를 호스트(배포할 서버) 포트와 연결
+    container_name: nginx
+    image: nginx:latest
+    ports:
       - "80:80"
-     #컨테이너 디렉토리와 호스트 디렉토리를 연결 시켜준다.
     volumes: 
       - .:/srv #현재 위치와 /srv(django 어플리케이션이 있는 위치) 
       - ./nginx:/etc/nginx/conf.d #nginx 설정파일이 있는 위치
-    depends_on: #컨테이너 의존관계를 의미한다.
+    depends_on:
       - muse
 
   muse:
+    container_name: muse
     build:
       context: .
-      dockerfile: ./Dockerfile #아까 작성한 DockerFile를 바탕으로 이미지 빌드
+      dockerfile: ./Dockerfile
       args:
         STAGE: DEV
-    volumes: #디렉토리 연결
-      - ./MuseDjango:/srv/MuseDjango/
-    ports: #호스트 포트와 컨테이너 포트를 연결
+    #volumes: #디렉토리 연결
+    #  - ./MuseDjango:/srv/MuseDjango/
+    ports:
       - "8000:8000"
     tty: true
-    platform: linux/amd64
+    platform: linux/amd64 # mac M1 local 에서만

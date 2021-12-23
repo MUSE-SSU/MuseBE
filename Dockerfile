@@ -65,7 +65,8 @@ COPY $DOCKER_SRC/topics $DOCKER_SRVPROJ/topics
 
 # EXPOSE: 네트워크 상에서 컨테이너로 들어오는 트래픽 리스닝하는 포트와 프로토콜 지정.
 # 프로토콜 지정 안하면 기본값 TCP
-EXPOSE 8000
+# EXPOSE 8000
+
 WORKDIR $DOCKER_SRVPROJ
 COPY ./docker-entrypoint.sh /
 
