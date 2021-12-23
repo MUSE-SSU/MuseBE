@@ -200,7 +200,6 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = PostDisplayAllSerializer(
                 owner_post, context={"request": request}, many=True
             )
-            print(serializer.data)
             return Response(serializer.data, status=200)
         except:
             return Response({"message": "ERROR: OWNER POST"}, status=400)
