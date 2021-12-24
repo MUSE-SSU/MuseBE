@@ -5,9 +5,6 @@ import datetime
 
 @shared_task
 def print_hello():
-    a = Post.objects.get(idx=178)
-    a.content = "str(datetime.datetime.now())"
-    a.save()
     print("print hello world!!!")
 
 
