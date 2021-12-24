@@ -106,10 +106,17 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Celery Settings
+CELERY_ALWAYS_EAGER = True
+CELERY_BROKER_URL = "redis://redis:6379"
+CELERY_RESULT_BACKEND = "redis://redis:6379"
+CELERY_ACCEPT_CONTENT = ["application/json", "json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Seoul"
+CELERY_ENABLE_UTC = False
 
-# Internationalization
-# https://docs.djangoproject.com/en/3.2/topics/i18n/
-
+# Django Server Settings
 LANGUAGE_CODE = "ko-kr"
 TIME_ZONE = "Asia/Seoul"
 USE_I18N = True
@@ -205,9 +212,3 @@ AWS_S3_SIGNATURE_VERSION = "s3v4"
 # HashTag 대소문자 구별 안함
 TAGGIT_CASE_INSENSITIVE = True
 TAGGIT_LIMIT = 30
-
-# Crontab
-CRONJOBS = [
-    ("*/1 * * * *", "musepost.cron.crontab_job", ">> ./logs/musepost_task.log"),
-    ("*/1 * * * *", "musepost.cron.select_muse"),
-]

@@ -1,5 +1,11 @@
 version: '3'
-services: 
+services:
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - '6379:6379'
+
   nginx:
     container_name: nginx
     image: nginx:latest
@@ -18,9 +24,37 @@ services:
       dockerfile: ./Dockerfile
       args:
         STAGE: DEV
-    #volumes: #디렉토리 연결
-    #  - ./MuseDjango:/srv/MuseDjango/
+    volumes: #디렉토리 연결
+      - ./MuseDjango:/srv/MuseDjango/
     ports:
       - "8000:8000"
     tty: true
     platform: linux/amd64 # mac M1 local 에서만
+    depends_on:
+      - redis
+    
+  celery:
+    container_name: celery
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        STAGE: DEV
+    tty: true
+    volumes:
+      - ./MuseDjango:/srv/MuseDjango/
+    command:
+      - celery
+  
+  celerybeat:
+    container_name: celerybeat
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        STAGE: DEV
+    tty: true
+    volumes:
+      - ./MuseDjango:/srv/MuseDjango/
+    command:
+      - celerybeat
