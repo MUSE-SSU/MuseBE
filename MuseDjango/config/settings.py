@@ -70,6 +70,17 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_WHITELIST = (
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "http://52.14.157.45",
+    "http://ec2-52-14-157-45.us-east-2.compute.amazonaws.com",
+)
+
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
@@ -169,7 +180,6 @@ REST_USE_JWT = True
 
 AUTH_USER_MODEL = "accounts.User"
 
-CORS_ORIGIN_ALLOW_ALL = True
 
 """
 # Image Upload To MEDIA

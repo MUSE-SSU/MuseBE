@@ -108,13 +108,14 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             nickname = request.data.get("nickname", None)
             self_introduce = request.data.get("self_introduce", "")
-            avatar = request.data.get("avatar", None)
+            avatar = request.data.get("avatar", "default_avatar.png")
         except:
             return Response({"message": "ERROR: USER UPDATE > REQUEST"}, status=400)
 
         try:
             if User.objects.filter(user_id=request.user, nickname=pk).exists():
-                request.user.nickname = nickname
+                if nickname:
+                    request.user.nickname = nickname
                 request.user.profile.avatar = avatar
                 request.user.profile.self_introduce = self_introduce
 
