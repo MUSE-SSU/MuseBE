@@ -17,15 +17,13 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
-    ".ap-northeast-2.compute.amazonaws.com",
-    "muse",
-    "localhost",
+    "ec2-52-14-157-45.us-east-2.compute.amazonaws.com",
+    "52.14.157.45",
+    "muse",  # localhost
 ]
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
