@@ -68,8 +68,12 @@ COPY $DOCKER_SRC/topics $DOCKER_SRVPROJ/topics
 # EXPOSE 8000
 
 WORKDIR $DOCKER_SRVPROJ
-COPY ./docker-entrypoint.sh /
 
+# COPY ./nginx/default.conf /etc/nginx/sites-available/
+# RUN ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled
+# RUN echo "daemon off;" >> /etc/nginx/nginx.conf
+
+COPY ./docker-entrypoint.sh /
 RUN ["chmod", "+x", "/docker-entrypoint.sh"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
 

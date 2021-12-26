@@ -104,17 +104,18 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=200)
 
     def partial_update(self, request, pk=None):
-        # PATCH host/account/pk
+        # PATCH host/account/pk(nickname)/
         try:
             nickname = request.data.get("nickname", None)
             self_introduce = request.data.get("self_introduce", "")
-            avatar = request.data.get("avatar", None)
+            avatar = request.data.get("avatar", "default_avatar.png")
         except:
             return Response({"message": "ERROR: USER UPDATE > REQUEST"}, status=400)
 
         try:
             if User.objects.filter(user_id=request.user, nickname=pk).exists():
-                request.user.nickname = nickname
+                if nickname:
+                    request.user.nickname = nickname
                 request.user.profile.avatar = avatar
                 request.user.profile.self_introduce = self_introduce
 
@@ -183,7 +184,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def my_page(self, request, pk=None):
-        # GET host/account/my_page/pk
+        # GET host/account/pk/my_page/
         try:
             owner = User.objects.get(nickname=pk)
             serializer = MyPageSerializer(owner, context={"request": request})
@@ -193,25 +194,25 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def owner_post(self, request, pk=None):
-        # GET host/account/owner_post/pk
+        # GET host/account/pk/owner_post/
         try:
             owner = User.objects.get(nickname=pk)
             owner_post = Post.objects.filter(writer=owner).order_by("-created_at")
             serializer = PostDisplayAllSerializer(
                 owner_post, context={"request": request}, many=True
             )
-            return Response(serializer.data, safe=False, status=200)
+            return Response(serializer.data, status=200)
         except:
             return Response({"message": "ERROR: OWNER POST"}, status=400)
 
     @action(detail=True, methods=["get"])
     def owner_liked_post(self, request, pk=None):
-        # GET host/account/owner_liked_post/pk
+        # GET host/account/pk/owner_liked_post/
         try:
-            owner_liked_post = Post.objects.filter(
-                post_like__like_user=request.user
-            ).order_by("-created_at")
             if User.objects.get(nickname=pk) == request.user:
+                owner_liked_post = Post.objects.filter(
+                    post_like__like_user=request.user
+                ).order_by("-created_at")
                 serializer = PostDisplayAllSerializer(
                     owner_liked_post, context={"request": request}, many=True
                 )
