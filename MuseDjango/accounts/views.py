@@ -10,7 +10,7 @@ from my_settings import (
     SECRET_ALGORITHM,
 )
 from rest_framework import status, viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import User, UserProfile
@@ -30,7 +30,17 @@ class UserViewSet(viewsets.ModelViewSet):
     """User API"""
 
     authentication_classed = [MUSEAuthenticationForWeb]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    # permission_classes = [IsAuthenticatedOrReadOnly]
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.action == "create":
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticatedOrReadOnly]
+        return [permission() for permission in permission_classes]
 
     def create(self, request):
         # POST host/account/
@@ -43,15 +53,11 @@ class UserViewSet(viewsets.ModelViewSet):
         except:
             return Response({"message": "ERROR: USER CREATE > REQUEST"}, status=400)
         try:
-            user_id, user_name = kakao_login(code, KAKAO_REGISTER_REDIRECT_URI)
-        except:
-            return Response({"message": "ERROR: USER CREATE > "}, status=400)
-        try:
             if create_type == "register":
+                user_id, user_name = kakao_login(code, KAKAO_REGISTER_REDIRECT_URI)
                 # DB에 존재하면 로그인하라고 반환.
                 if User.objects.filter(user_id=user_id).exists():
                     return Response({"result": False}, status=400)
-
                 # DB에 없으면 회원가입 후 로그인 성공
                 else:
                     serializer = UserSerializer(
@@ -78,6 +84,8 @@ class UserViewSet(viewsets.ModelViewSet):
                         )
                     return Response(serializer.errors, status=400)
             elif create_type == "login":
+                user_id, user_name = kakao_login(code, KAKAO_LOGIN_REDIRECT_URI)
+
                 # DB에 있는 유저면, 로그인 성공
                 if User.objects.filter(user_id=user_id).exists():
                     encoded_token = jwt.encode(
@@ -86,7 +94,6 @@ class UserViewSet(viewsets.ModelViewSet):
                     return Response(
                         {"result": True, "token": encoded_token}, status=200
                     )
-
                 # DB에 없으면, 회원가입부터 하라고 반환
                 else:
                     return Response({"result": False}, status=400)
@@ -123,9 +130,9 @@ class UserViewSet(viewsets.ModelViewSet):
                 request.user.profile.save()
                 return Response({"message": "SUCCESS"}, status=200)
             else:
-                return JsonResponse({"message": "ERROR: USER UPDATE"}, status=400)
+                return Response({"message": "ERROR: USER UPDATE"}, status=400)
         except:
-            return JsonResponse({"message": "ERROR: USER UPDATE"}, status=400)
+            return Response({"message": "ERROR: USER UPDATE"}, status=400)
 
     def retrieve(self, request, pk=None):
         pass
@@ -206,16 +213,18 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({"message": "ERROR: OWNER POST"}, status=400)
 
     @action(detail=True, methods=["get"])
-    def owner_liked_post(self, request, pk=None):
-        # GET host/account/pk/owner_liked_post/
+    def owner_bookmark_post(self, request, pk=None):
+        # GET host/account/pk/owner_bookmark_post/
         try:
             if User.objects.get(nickname=pk) == request.user:
                 owner_liked_post = Post.objects.filter(
-                    post_like__like_user=request.user
+                    post_bookmark__user=request.user
                 ).order_by("-created_at")
+
                 serializer = PostDisplayAllSerializer(
                     owner_liked_post, context={"request": request}, many=True
                 )
+
                 return Response(serializer.data, status=200)
         except:
             return Response({"message": "ERROR: OWNER LIKED POST"}, status=400)
@@ -450,7 +459,6 @@ def follow(request):
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
 
 
-"""
 @authorization_validator
 def following_list(request):
     # 내가 누른 사람들 -> 팔로잉
@@ -483,7 +491,6 @@ def follower_list(request):
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     else:
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
-"""
 
 
 @authorization_validator_or_none

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from config.settings import MEDIA_URL
-from musepost.models import Post, PostLike
+from musepost.models import Post
 from musepost.serializers import PostDisplayAllSerializer
 
 

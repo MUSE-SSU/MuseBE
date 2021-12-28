@@ -67,11 +67,34 @@ class PostLike(models.Model):
         db_column="like_user",
         related_name="likeUser",
         verbose_name="좋아요 누른 유저",
+        default="default",
     )
 
     class Meta:
         db_table = "Post_Like"
         verbose_name_plural = "게시글 좋아요"
+
+
+class PostBookmark(models.Model):
+    idx = models.AutoField(primary_key=True, null=False, blank=False)
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        db_column="post_idx",
+        related_name="post_bookmark",
+        verbose_name="게시글 북마크",
+    )
+    user = models.ForeignKey(
+        User,
+        to_field="user_id",
+        on_delete=models.CASCADE,
+        db_column="user_bookmark",
+        verbose_name="유저 북마크",
+    )
+
+    class Meta:
+        db_table = "Post_Bookmark"
+        verbose_name_plural = "게시글 북마크"
 
 
 # 댓글

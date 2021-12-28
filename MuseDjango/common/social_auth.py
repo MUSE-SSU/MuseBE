@@ -2,6 +2,7 @@ from django.http import JsonResponse
 import json
 import requests
 from my_settings import KAKAO_REST_KEY, SECRET_KEY, SECRET_ALGORITHM
+from rest_framework.response import Response
 
 
 def kakao_login(code, log_method):
@@ -17,11 +18,11 @@ def kakao_login(code, log_method):
             },
         )
     except Exception as e:
-        return JsonResponse({"message": e}, status=400)
+        return Response({"message": e}, status=400)
 
     access_token = json.loads(response.content).get("access_token")
     if access_token is None:
-        return JsonResponse({"message": "INVALID CODE"}, status=400)
+        return Response({"message": "INVALID CODE"}, status=400)
 
     # Get User Info
     try:
@@ -30,11 +31,11 @@ def kakao_login(code, log_method):
             headers={"Authorization": f"Bearer {access_token}"},
         )
     except Exception as e:
-        return JsonResponse({"message": e}, status=400)
+        return Response({"message": e}, status=400)
 
     user_info = json.loads(response.content)
     if user_info.get("id") is None:
-        return JsonResponse({"message": "INVALID TOKEN"}, status=400)
+        return Response({"message": "INVALID TOKEN"}, status=400)
 
     user_id = user_info["id"]
     user_name = user_info["properties"]["nickname"]

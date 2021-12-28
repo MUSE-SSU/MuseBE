@@ -7,25 +7,18 @@ DATABASES = my_settings.DATABASES
 SECRET_KEY = my_settings.SECRET_KEY
 SECRET_ALGORITHM = my_settings.SECRET_ALGORITHM
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# APPS_DIR = os.path.join(BASE_DIR, 'myapps')
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
-    ".ap-northeast-2.compute.amazonaws.com",
+    "ec2-52-14-157-45.us-east-2.compute.amazonaws.com",
+    "52.14.157.45",
     "muse",
-    "localhost",
 ]
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -134,12 +127,7 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = False
 
-# Default primary key field type
-# https://docs.dja@method_decorator(csrf_exempt)ngoproject.com/en/3.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# personal add settings
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
@@ -173,10 +161,6 @@ JWT_AUTH = {
 
 REST_USE_JWT = True
 """
-# ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
-# LOGIN_REDIRECT_URL = "/"
-# ACCOUNT_AUTHENTICATED_LOGOUT_REDIRECTS = True
-# ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 
 AUTH_USER_MODEL = "accounts.User"
 
