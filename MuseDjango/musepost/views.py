@@ -271,14 +271,32 @@ class PostViewSet(viewsets.ModelViewSet):
                 like.delete()
                 result = False
                 post.likes -= 1
-                post.save()
             else:
                 result = True
                 post.likes += 1
-                post.save()
-            return Response({"is_press_like": result}, status=200)
+            post.save()
+            return Response({"is_like": result}, status=200)
         except:
-            return Response({"message": "ERROR: POST LIKE"}, status=401)
+            return Response({"message": "ERROR: POST LIKE"}, status=400)
+
+    @action(detail=True, methods=["post"])
+    def bookmark(self, request, pk=None):
+        # POST host/post/pk/bookmark/
+        try:
+            post = Post.objects.get(idx=pk)
+            user = User.objects.get(user_id=request.user.user_id)
+            bookmark, is_bookmarked = PostBookmark.objects.get_or_create(
+                post=post, user=user
+            )
+            if not is_bookmarked:
+                bookmark.delete()
+                result = False
+            else:
+                result = True
+            bookmark.save()
+            return Response({"is_bookmark": result}, status=200)
+        except:
+            return Response({"message": "ERROR: POST BOOKMARK"}, status=400)
 
 
 class CommentViewSet(viewsets.ModelViewSet):

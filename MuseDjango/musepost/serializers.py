@@ -78,6 +78,7 @@ class PostDisplayAllSerializer(serializers.ModelSerializer):
             login_user = self.context.get("request").user
         except:
             login_user = None
+        print(Post.objects.filter(idx=obj.idx, writer=login_user).exists())
         return (
             True
             if Post.objects.filter(idx=obj.idx, writer=login_user).exists()
@@ -130,6 +131,7 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
     is_writer = serializers.SerializerMethodField()
     writer_other_post = serializers.SerializerMethodField()
     is_login_user_follow = serializers.SerializerMethodField()
+    is_login_user_bookmark = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -144,6 +146,7 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             "views",
             "likes",
             "is_login_user_liked",
+            "is_login_user_bookmark",
             "is_login_user_follow",
             "is_writer",
             "topic",
@@ -156,9 +159,34 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             "writer_other_post",
         )
 
+    def get_is_login_user_bookmark(self, obj):
+        try:
+            login_user = self.context.get("request").user
+        except:
+            login_user = None
+        return (
+            True
+            if PostBookmark.objects.filter(post=obj, user=login_user).exists()
+            else False
+        )
+
+    def get_is_login_user_liked(self, obj):
+        try:
+            login_user = self.context.get("request").user
+        except:
+            login_user = None
+        return (
+            True
+            if PostLike.objects.filter(post=obj, like_user=login_user).exists()
+            else False
+        )
+
     def get_is_login_user_follow(self, obj):
-        request = self.context.get("request")
-        if Follow.objects.filter(following=request.user, follower=obj.writer).exists():
+        try:
+            login_user = self.context.get("request").user
+        except:
+            login_user = None
+        if Follow.objects.filter(following=login_user, follower=obj.writer).exists():
             is_followed = True
         else:
             is_followed = False
@@ -206,17 +234,6 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             comment_obj, context={"login_user": login_user}, many=True
         )
         return comment_serialized.data
-
-    def get_is_login_user_liked(self, obj):
-        try:
-            login_user = self.context.get("request").user
-        except:
-            login_user = None
-        return (
-            True
-            if PostLike.objects.filter(post=obj, like_user=login_user).exists()
-            else False
-        )
 
     def get_is_writer(self, obj):
         try:

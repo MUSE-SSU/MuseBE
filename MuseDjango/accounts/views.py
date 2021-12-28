@@ -206,16 +206,18 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({"message": "ERROR: OWNER POST"}, status=400)
 
     @action(detail=True, methods=["get"])
-    def owner_liked_post(self, request, pk=None):
-        # GET host/account/pk/owner_liked_post/
+    def owner_bookmark_post(self, request, pk=None):
+        # GET host/account/pk/owner_bookmark_post/
         try:
             if User.objects.get(nickname=pk) == request.user:
                 owner_liked_post = Post.objects.filter(
-                    post_like__like_user=request.user
+                    post_bookmark__user=request.user
                 ).order_by("-created_at")
+
                 serializer = PostDisplayAllSerializer(
                     owner_liked_post, context={"request": request}, many=True
                 )
+
                 return Response(serializer.data, status=200)
         except:
             return Response({"message": "ERROR: OWNER LIKED POST"}, status=400)
@@ -450,7 +452,6 @@ def follow(request):
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
 
 
-"""
 @authorization_validator
 def following_list(request):
     # 내가 누른 사람들 -> 팔로잉
@@ -483,7 +484,6 @@ def follower_list(request):
         return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
     else:
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
-"""
 
 
 @authorization_validator_or_none
