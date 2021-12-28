@@ -130,9 +130,9 @@ class UserViewSet(viewsets.ModelViewSet):
                 request.user.profile.save()
                 return Response({"message": "SUCCESS"}, status=200)
             else:
-                return JsonResponse({"message": "ERROR: USER UPDATE"}, status=400)
+                return Response({"message": "ERROR: USER UPDATE"}, status=400)
         except:
-            return JsonResponse({"message": "ERROR: USER UPDATE"}, status=400)
+            return Response({"message": "ERROR: USER UPDATE"}, status=400)
 
     def retrieve(self, request, pk=None):
         pass
