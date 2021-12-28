@@ -10,7 +10,7 @@ from my_settings import (
     SECRET_ALGORITHM,
 )
 from rest_framework import status, viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import User, UserProfile
@@ -30,7 +30,17 @@ class UserViewSet(viewsets.ModelViewSet):
     """User API"""
 
     authentication_classed = [MUSEAuthenticationForWeb]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    # permission_classes = [IsAuthenticatedOrReadOnly]
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.action == "create":
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticatedOrReadOnly]
+        return [permission() for permission in permission_classes]
 
     def create(self, request):
         # POST host/account/
@@ -43,15 +53,11 @@ class UserViewSet(viewsets.ModelViewSet):
         except:
             return Response({"message": "ERROR: USER CREATE > REQUEST"}, status=400)
         try:
-            user_id, user_name = kakao_login(code, KAKAO_REGISTER_REDIRECT_URI)
-        except:
-            return Response({"message": "ERROR: USER CREATE > "}, status=400)
-        try:
             if create_type == "register":
+                user_id, user_name = kakao_login(code, KAKAO_REGISTER_REDIRECT_URI)
                 # DB에 존재하면 로그인하라고 반환.
                 if User.objects.filter(user_id=user_id).exists():
                     return Response({"result": False}, status=400)
-
                 # DB에 없으면 회원가입 후 로그인 성공
                 else:
                     serializer = UserSerializer(
@@ -78,6 +84,8 @@ class UserViewSet(viewsets.ModelViewSet):
                         )
                     return Response(serializer.errors, status=400)
             elif create_type == "login":
+                user_id, user_name = kakao_login(code, KAKAO_LOGIN_REDIRECT_URI)
+
                 # DB에 있는 유저면, 로그인 성공
                 if User.objects.filter(user_id=user_id).exists():
                     encoded_token = jwt.encode(
@@ -86,7 +94,6 @@ class UserViewSet(viewsets.ModelViewSet):
                     return Response(
                         {"result": True, "token": encoded_token}, status=200
                     )
-
                 # DB에 없으면, 회원가입부터 하라고 반환
                 else:
                     return Response({"result": False}, status=400)

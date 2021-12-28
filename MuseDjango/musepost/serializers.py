@@ -78,7 +78,6 @@ class PostDisplayAllSerializer(serializers.ModelSerializer):
             login_user = self.context.get("request").user
         except:
             login_user = None
-        print(Post.objects.filter(idx=obj.idx, writer=login_user).exists())
         return (
             True
             if Post.objects.filter(idx=obj.idx, writer=login_user).exists()
@@ -200,7 +199,6 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
                 .exclude(idx=obj.idx)
                 .order_by("-likes", "-views")
             )
-            # print(post_obj)
             if post_obj.exists():
                 count_post = post_obj.count()
                 if count_post >= 3:
