@@ -92,6 +92,9 @@ class UserProfile(models.Model):
     self_introduce = models.CharField(
         max_length=100, blank=True, null=True, verbose_name="자기 소개"
     )
+    instar_id = models.CharField(
+        max_length=100, blank=True, null=True, verbose_name="인스타 ID"
+    )
 
     def __str__(self):
         return str(self.user)
