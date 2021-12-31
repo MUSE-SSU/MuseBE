@@ -8,5 +8,5 @@ class Topic(models.Model):
     activate_week = models.BooleanField(default=False, verbose_name="현재 진행 주차")
 
     class Meta:
-        db_table = "Topics"
+        db_table = "MUSE_Topics"
         verbose_name_plural = "콘테스트 주제"

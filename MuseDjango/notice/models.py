@@ -34,7 +34,7 @@ class Notice(models.Model):
     modified_at = models.DateTimeField(verbose_name="최근 수정 날짜", auto_now=True)
 
     class Meta:
-        db_table = "Notice"
+        db_table = "MUSE_Notice"
         verbose_name_plural = "공지사항"
 
 
@@ -56,5 +56,5 @@ class Banner(models.Model):
     modified_at = models.DateTimeField(verbose_name="최근 수정 날짜", auto_now=True)
 
     class Meta:
-        db_table = "Banner"
+        db_table = "MUSE_Banner"
         verbose_name_plural = "배너"

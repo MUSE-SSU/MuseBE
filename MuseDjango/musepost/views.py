@@ -42,7 +42,7 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             if hashtag:
                 hashtag = hashtag.strip().split(" ")
-
+            print(hashtag)
             if upload_type == "reference":
                 data = {
                     "writer": request.user,
