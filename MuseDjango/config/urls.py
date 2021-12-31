@@ -16,6 +16,7 @@ router.register(r"account", account_views.UserViewSet, basename="account")
 router.register(r"post", post_views.PostViewSet, basename="post")
 router.register(r"comment", post_views.CommentViewSet, basename="comment")
 router.register(r"notice", notice_views.NoticeViewSet, basename="notice")
+router.register(r"banner", notice_views.BannerViewSet, basename="banner")
 
 urlpatterns = [
     path("", include(router.urls)),

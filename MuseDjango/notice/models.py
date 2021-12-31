@@ -9,10 +9,10 @@ NOTICE_CATEGORY = (
     ("one_time", "일회성 팝업"),
 )
 BANNER_CATEGORY = (
-    ("main_banner", "메인 배너"),
-    ("muse_banner", "뮤즈 배너"),
-    ("contest_banner", "콘테스트 배너"),
-    ("reference_banner", "레퍼런스 배너"),
+    ("main", "메인 배너"),
+    ("muse", "뮤즈 배너"),
+    ("contest", "콘테스트 배너"),
+    ("reference", "레퍼런스 배너"),
 )
 
 
