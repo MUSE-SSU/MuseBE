@@ -19,7 +19,7 @@ router.register(r"notice", notice_views.NoticeViewSet, basename="notice")
 router.register(r"banner", notice_views.BannerViewSet, basename="banner")
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path("api/", include(router.urls)),
     path("admin/", admin.site.urls),
     # path("accounts/", include("accounts.urls")),
     # path("posts/", include("musepost.urls")),

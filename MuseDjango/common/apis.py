@@ -25,11 +25,9 @@ def integrated_search(request):
                     operator.or_, (Q(nickname__icontains=key) for key in search)
                 )
                 user_queryset = User.objects.filter(query)
-                print(user_queryset)
                 if user_queryset:
                     user_serializer = UserInfoSerializer(user_queryset, many=True)
                     result["user"] = user_serializer.data
-                print(result)
 
                 # 게시물 검색
                 post_title_query = reduce(
@@ -53,7 +51,6 @@ def integrated_search(request):
                         post_queryset, context={"request": request}, many=True
                     )
                     result["post"] = post_serializer.data
-                print(result)
 
                 if result:
                     return JsonResponse(result, safe=False, status=200)
