@@ -6,7 +6,7 @@ NOTICE_CATEGORY = (
     ("tos", "이용 약관"),
     ("guide", "이용 안내"),
     ("footer", "사이트 하단 설명"),
-    ("one_time", "일회성 팝업"),
+    ("popup", "일회성 팝업"),
 )
 BANNER_CATEGORY = (
     ("main", "메인 배너"),

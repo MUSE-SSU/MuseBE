@@ -23,6 +23,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # path("accounts/", include("accounts.urls")),
     # path("posts/", include("musepost.urls")),
-    path("topics/", include("topics.urls")),
+    path("api/topics/", include("topics.urls")),
     path("api/search/", common_apis.integrated_search, name="integrated-search"),
 ]

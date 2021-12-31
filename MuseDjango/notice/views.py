@@ -19,6 +19,7 @@ class NoticeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def list(self, request):
+        # GET host/api/notice/?type=
         try:
             notice_type = request.query_params.get("type", None)
         except:
@@ -42,6 +43,7 @@ class BannerViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def list(self, request):
+        # GET host/api/banner/?type=
         try:
             banner_type = request.query_params.get("type", None)
         except:
