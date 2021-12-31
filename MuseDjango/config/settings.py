@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "accounts",
     "musepost",
     "topics",
+    "notice",
     # Third Party
     "django_celery_beat",
     "django_celery_results",
