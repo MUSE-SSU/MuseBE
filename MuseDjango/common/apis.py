@@ -16,8 +16,9 @@ def integrated_search(request):
     if request.method == "GET":
         try:
             search = request.GET.get("q", None)
+
             if search:
-                search = search.split(" ")
+                search = [key for key in search.split("+") if key]
                 result = {}
 
                 # 유저 닉네임 검색
