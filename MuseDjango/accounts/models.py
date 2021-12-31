@@ -68,7 +68,7 @@ class User(AbstractBaseUser):
         return self.is_superuser
 
     class Meta:
-        db_table = "User"
+        db_table = "MUSE_User"
         verbose_name_plural = "유저"
 
 
@@ -100,7 +100,7 @@ class UserProfile(models.Model):
         return str(self.user)
 
     class Meta:
-        db_table = "UserProfile"
+        db_table = "MUSE_UserProfile"
         verbose_name_plural = "유저 프로필"
 
 
@@ -125,5 +125,5 @@ class Follow(models.Model):
     )
 
     class Meta:
-        db_table = "UserFollow"
+        db_table = "MUSE_UserFollow"
         verbose_name_plural = "팔로우"

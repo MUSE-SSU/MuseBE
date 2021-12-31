@@ -128,9 +128,9 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
     comment = serializers.SerializerMethodField()
     is_login_user_liked = serializers.SerializerMethodField()
     is_writer = serializers.SerializerMethodField()
-    writer_other_post = serializers.SerializerMethodField()
     is_login_user_follow = serializers.SerializerMethodField()
     is_login_user_bookmark = serializers.SerializerMethodField()
+    # writer_other_post = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -155,7 +155,6 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             "modified_at",
             "hashtag",
             "comment",
-            "writer_other_post",
         )
 
     def get_is_login_user_bookmark(self, obj):
@@ -191,27 +190,6 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             is_followed = False
         return is_followed
 
-    def get_writer_other_post(self, obj):
-        try:
-            login_user = self.context.get("request")
-            post_obj = (
-                Post.objects.filter(writer=obj.writer)
-                .exclude(idx=obj.idx)
-                .order_by("-likes", "-views")
-            )
-            if post_obj.exists():
-                count_post = post_obj.count()
-                if count_post >= 3:
-                    post_obj = post_obj[:3]
-                elif 1 <= count_post < 3:
-                    post_obj = post_obj[:count_post]
-                srl = PostDisplayAllSerializer(
-                    post_obj, context={"request": login_user}, many=True
-                )
-            return srl.data
-        except:
-            return None
-
     # noinspection PyMethodMayBeStatic
     def get_writer_avatar(self, obj):
         if not obj.writer.profile.avatar:
@@ -243,6 +221,27 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             if Post.objects.filter(idx=obj.idx, writer=login_user).exists()
             else False
         )
+
+    # def get_writer_other_post(self, obj):
+    #     try:
+    #         login_user = self.context.get("request")
+    #         post_obj = Post.objects.filter(writer=obj.writer, is_contest=True).exclude(
+    #             idx=obj.idx
+    #         )
+    #         if post_obj.exists():
+    #             count_post = post_obj.count()
+    #             if count_post >= 6:
+    #                 post_obj = post_obj[:6]
+    #             elif 1 <= count_post < 6:
+    #                 post_obj = post_obj[:count_post]
+    #             srl = PostDisplayAllSerializer(
+    #                 post_obj, context={"request": login_user}, many=True
+    #             )
+    #             return srl.data
+    #         else:
+    #             return None
+    #     except:
+    #         return None
 
 
 class CommentUploadSerializer(serializers.ModelSerializer):

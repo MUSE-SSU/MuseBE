@@ -20,7 +20,7 @@ app.conf.beat_schedule = {
     # 1분마다 hello celery world!! 출력
     "print_celery_hello": {
         "task": "musepost.tasks.print_hello",
-        "schedule": crontab(minute=0, hour=0, day_of_week="sun")
+        "schedule": crontab(minute=0, hour=0, day_of_week="mon")
         # 로컬에서는 crontab 작동이 안함.. -> 5.0 5초 이걸로 작동시킴. crontab(minute=1, hour=0) ec2 올려서 확인해볼 것
     }
 }
