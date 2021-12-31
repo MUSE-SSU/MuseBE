@@ -3,16 +3,12 @@ from .models import *
 
 
 class NoticeAdmin(admin.ModelAdmin):
-    list_display = [
-        "idx",
-        "banner_main",
-        "banner_muse",
-        "banner_contest",
-        "banner_reference",
-        "tos",
-        "created_at",
-        "modified_at",
-    ]
+    list_display = [field.name for field in Notice._meta.get_fields()]
+
+
+class BannerAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in Banner._meta.get_fields()]
 
 
 admin.site.register(Notice, NoticeAdmin)
+admin.site.register(Banner, BannerAdmin)

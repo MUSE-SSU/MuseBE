@@ -5,7 +5,8 @@ from django.db import models
 NOTICE_CATEGORY = (
     ("tos", "이용 약관"),
     ("guide", "이용 안내"),
-    ("general", "일반")("footer", "사이트 설명"),
+    ("footer", "사이트 설명"),
+    ("one_time", "일회성 팝업"),
 )
 BANNER_CATEGORY = (
     ("main_banner", "메인 배너"),
