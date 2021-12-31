@@ -5,7 +5,7 @@ from django.db import models
 NOTICE_CATEGORY = (
     ("tos", "이용 약관"),
     ("guide", "이용 안내"),
-    ("footer", "사이트 설명"),
+    ("footer", "사이트 하단 설명"),
     ("one_time", "일회성 팝업"),
 )
 BANNER_CATEGORY = (
@@ -25,8 +25,8 @@ class Notice(models.Model):
         choices=NOTICE_CATEGORY,
         verbose_name="공지 카테고리",
     )
-    title = models.CharField(max_length=1000, blank=True, null=True, verbose_name="제목")
-    content = models.CharField(
+    title = models.TextField(max_length=500, blank=True, null=True, verbose_name="제목")
+    content = models.TextField(
         max_length=1000, blank=True, null=True, verbose_name="내용"
     )
     usage = models.BooleanField(default=True, verbose_name="노출 여부")
@@ -47,8 +47,8 @@ class Banner(models.Model):
         choices=BANNER_CATEGORY,
         verbose_name="배너 카테고리",
     )
-    title = models.CharField(max_length=1000, blank=True, null=True, verbose_name="제목")
-    content = models.CharField(
+    title = models.TextField(max_length=500, blank=True, null=True, verbose_name="제목")
+    content = models.TextField(
         max_length=1000, blank=True, null=True, verbose_name="내용"
     )
     usage = models.BooleanField(default=True, verbose_name="노출 여부")
