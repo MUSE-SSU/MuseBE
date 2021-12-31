@@ -58,6 +58,20 @@ class Post(models.Model):
         max_length=256, verbose_name="원본 URL", null=True, blank=True
     )
 
+    # post color
+    dominant_color = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="지배 색상"
+    )
+    palette_color1 = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="유사 색상1"
+    )
+    palette_color2 = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="유사 색상2"
+    )
+    palette_color3 = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="유사 색상3"
+    )
+
     # 콘테스트 참가 여부 / 현재 상태 / 뮤즈 선정
     is_reference = models.BooleanField(default=False, verbose_name="레퍼런스 게시물")
     is_contest = models.BooleanField(default=True, verbose_name="콘테스트 게시물")

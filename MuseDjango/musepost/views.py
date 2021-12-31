@@ -20,6 +20,7 @@ from common.authentication import (
 )
 from .serializers import *
 import random
+from musepost.tasks import get_image_color
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -42,7 +43,7 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             if hashtag:
                 hashtag = hashtag.strip().split(" ")
-            print(hashtag)
+
             if upload_type == "reference":
                 data = {
                     "writer": request.user,
@@ -80,7 +81,12 @@ class PostViewSet(viewsets.ModelViewSet):
 
             serializer = PostUploadSerializer(data=data, partial=True)
             if serializer.is_valid():
-                serializer.save()
+                post_idx = serializer.save()
+                print(post_idx)
+                print(image)
+
+                get_image_color.delay(post_idx)
+
                 return Response({"message": "SUCCESS"}, status=200)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except:
@@ -247,6 +253,16 @@ class PostViewSet(viewsets.ModelViewSet):
         except:
             return Response({"message": "ERROR: PREVIEW MUSE"}, status=400)
 
+    @action(detail=True, methods=["get"])
+    def other_reference(self, request, pk=None):
+        # GET host/post/pk/other_reference/
+        pass
+
+    @action(detail=True, methods=["get"])
+    def other_contest(self, request, pk=None):
+        # GET host/post/pk/other_contest/
+        pass
+
     @action(detail=False, methods=["get"])
     def list_muse(self, request):
         # GET host/post/list_muse
@@ -302,6 +318,7 @@ class PostViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
 
     authentication_classes = [MUSEAuthenticationForWeb]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def create(self, request):
         # POST host/comment/
@@ -315,9 +332,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 
             data = {"post": post_idx, "writer": request.user, "comment": comment}
             serializer = CommentUploadSerializer(data=data)
+
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=200)
+                return Response({"message": "SUCCESS"}, status=200)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "ERROR: COMMENT CREATE"}, status=400)
@@ -548,7 +566,7 @@ def muse_section(request):
             past_contest_muse = Post.objects.filter(
                 week=past_contest_week, is_muse=True
             )[0]
-            print(past_contest_muse)
+
         except:
             return JsonResponse({"message": "REQUEST ERROR"}, status=400)
 
