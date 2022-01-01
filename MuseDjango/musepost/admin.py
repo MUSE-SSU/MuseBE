@@ -81,6 +81,7 @@ class PostAdmin(admin.ModelAdmin):
         "modified_at",
     ]
     actions = [admin_get_image_color]
+    list_per_page = 20
 
 
 class PostLikeAdmin(admin.ModelAdmin):
