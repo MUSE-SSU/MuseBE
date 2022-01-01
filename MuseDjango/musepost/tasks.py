@@ -4,9 +4,6 @@ import logging
 from colorthief import ColorThief
 import webcolors
 
-# app = Celery("config")
-# app.config_from_object("django.conf:settings", namespace="CELERY")
-
 logger = logging.getLogger("celery")
 
 
@@ -33,9 +30,10 @@ def get_colour_name(requested_colour):
 @shared_task
 def get_image_color(post_idx):
     try:
-        logger.info("asdfasdfasdf")
-        print("-----START GET COLOR-----")
-        post = Post.objects.get(post_idx)
+        post = Post.objects.get(idx=post_idx)
+    except:
+        logger.error("ERROR: GET IMAGE COLOR > NONE OBJ")
+    try:
         color_thief = ColorThief(post.image)
 
         # get domminat color
@@ -62,9 +60,8 @@ def get_image_color(post_idx):
         post.palette_color3 = plt_name[2]
 
         post.save()
-
     except:
-        print("erroror")
+        logger.error("=====ERROR: GET IMAGE COLOR=====")
 
 
 @shared_task

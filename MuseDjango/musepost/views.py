@@ -82,10 +82,9 @@ class PostViewSet(viewsets.ModelViewSet):
             serializer = PostUploadSerializer(data=data, partial=True)
             if serializer.is_valid():
                 uploaded_post = serializer.save()
-                try:
-                    get_image_color.delay(uploaded_post.idx)
-                except Exception as e:
-                    print("NONO", e)
+                # 이미지 색상 추출
+                get_image_color.delay(uploaded_post.idx)
+
                 return Response({"message": "SUCCESS"}, status=200)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except:

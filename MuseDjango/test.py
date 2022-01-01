@@ -1,5 +1,6 @@
 from colorthief import ColorThief
 import webcolors
+from musepost.models import Post
 
 
 def closest_colour(requested_colour):
@@ -22,21 +23,31 @@ def get_colour_name(requested_colour):
     return actual_name, closest_name
 
 
-def get_image_color(image_url):
-    color_thief = ColorThief(image_url)
-    # get the dominant color
-    dominant_color = color_thief.get_color(quality=1)
-    # build a color palette
-    palette = color_thief.get_palette(color_count=3)
-    print(dominant_color)
-    print(palette)
-    actual_name, closest_name = get_colour_name(dominant_color)
-    print(actual_name, closest_name)
-    for plt in palette:
-        actual_name, closest_name = get_colour_name(plt)
-        print(actual_name, closest_name)
+def get_image_color():
+    posts = Post.objects.all()
+    for post in posts:
+        color_thief = ColorThief(post.image)
+        # get domminat color
+        dominant_color = color_thief.get_color(quality=1)
+        dominant_actual_name, dominant_closest_name = get_colour_name(dominant_color)
 
+        if dominant_actual_name:
+            post.dominant_color = dominant_actual_name
+        else:
+            post.dominant_color = dominant_closest_name
 
-get_image_color(
-    "https://muse-bucket.s3.ap-northeast-2.amazonaws.com/media/public/2021/12/31/1847747999/post/c3a1a3a39588422e810a961472d64ccc/.jpeg"
-)
+        # get palette color
+        palette = color_thief.get_palette(color_count=3)
+        plt_name = []
+        for plt in palette:
+            plt_actual_name, plt_closest_name = get_colour_name(plt)
+            if plt_actual_name:
+                plt_name.append(plt_actual_name)
+            else:
+                plt_name.append(plt_closest_name)
+
+        post.palette_color1 = plt_name[0]
+        post.palette_color2 = plt_name[1]
+        post.palette_color3 = plt_name[2]
+
+        post.save()
