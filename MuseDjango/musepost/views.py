@@ -20,7 +20,7 @@ from common.authentication import (
 )
 from .serializers import *
 import random
-from musepost.tasks import get_image_color
+from .tasks import get_image_color
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -81,11 +81,9 @@ class PostViewSet(viewsets.ModelViewSet):
 
             serializer = PostUploadSerializer(data=data, partial=True)
             if serializer.is_valid():
-                post_idx = serializer.save()
-                print(post_idx)
-                print(image)
-
-                get_image_color.delay(post_idx)
+                uploaded_post = serializer.save()
+                # 이미지 색상 추출
+                get_image_color.delay(uploaded_post.idx)
 
                 return Response({"message": "SUCCESS"}, status=200)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

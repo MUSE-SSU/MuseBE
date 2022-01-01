@@ -1,12 +1,10 @@
 from celery import shared_task
 from .models import Post
+import logging
 from colorthief import ColorThief
 import webcolors
-from celery import Celery
-from .models import Post
 
-app = Celery("config")
-app.config_from_object("django.conf:settings", namespace="CELERY")
+logger = logging.getLogger("celery")
 
 
 def closest_colour(requested_colour):
@@ -29,14 +27,14 @@ def get_colour_name(requested_colour):
     return actual_name, closest_name
 
 
-@app.task
+@shared_task
 def get_image_color(post_idx):
     try:
-        print("asdfadsf")
-        post = Post.objects.get(post_idx)
-        color_thief = ColorThief(
-            "https://muse-bucket.s3.ap-northeast-2.amazonaws.com/media/public/2021/12/31/1847747999/post/c3a1a3a39588422e810a961472d64ccc/.jpeg"
-        )
+        post = Post.objects.get(idx=post_idx)
+    except:
+        logger.error("ERROR: GET IMAGE COLOR > NONE OBJ")
+    try:
+        color_thief = ColorThief(post.image)
 
         # get domminat color
         dominant_color = color_thief.get_color(quality=1)
@@ -61,8 +59,9 @@ def get_image_color(post_idx):
         post.palette_color2 = plt_name[1]
         post.palette_color3 = plt_name[2]
 
+        post.save()
     except:
-        print("erroror")
+        logger.error("=====ERROR: GET IMAGE COLOR=====")
 
 
 @shared_task
