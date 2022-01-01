@@ -1,16 +1,13 @@
 from celery import shared_task
-from celery.utils.log import get_task_logger
-from celery import Celery
 from .models import Post
-
+import logging
 from colorthief import ColorThief
 import webcolors
 
-from config.celery import app
-
 # app = Celery("config")
 # app.config_from_object("django.conf:settings", namespace="CELERY")
-logger = get_task_logger(__name__)
+
+logger = logging.getLogger("celery")
 
 
 def closest_colour(requested_colour):
@@ -33,7 +30,7 @@ def get_colour_name(requested_colour):
     return actual_name, closest_name
 
 
-@app.task
+@shared_task
 def get_image_color(post_idx):
     try:
         logger.info("asdfasdfasdf")
