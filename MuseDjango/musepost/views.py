@@ -20,7 +20,7 @@ from common.authentication import (
 )
 from .serializers import *
 import random
-from musepost.tasks import get_image_color
+from .tasks import get_image_color
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -83,10 +83,8 @@ class PostViewSet(viewsets.ModelViewSet):
             if serializer.is_valid():
                 post_idx = serializer.save()
                 print(post_idx)
-                print(image)
-
                 get_image_color.delay(post_idx)
-
+                print("asdfasdf")
                 return Response({"message": "SUCCESS"}, status=200)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except:
