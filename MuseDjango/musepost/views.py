@@ -314,13 +314,13 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def recommend_post(self, request, pk=None):
-        # GET host/post/pk/recommend_post/
+        # GET host/post/pk/recommend_post/?page=
         # pk는 현재 보고있는 게시물의 idx
         try:
             page = int(request.query_params.get("page", 1))
             current_post = Post.objects.get(idx=pk)
         except:
-            return Response({"message": "ERROR: POST BOOKMARK > REQUEST"}, status=400)
+            return Response({"message": "ERROR: POST RECOMMEND > REQUEST"}, status=400)
         try:
             color = [
                 current_post.dominant_color,
@@ -349,7 +349,9 @@ class PostViewSet(viewsets.ModelViewSet):
                 .distinct()
             )
         except:
-            return Response({"message": "ERROR: POST RECOMMEND > RECOMMEND"}, status=400)
+            return Response(
+                {"message": "ERROR: POST RECOMMEND > RECOMMEND"}, status=400
+            )
         try:
             PAGE_SIZE = 8
             limit = int(page * PAGE_SIZE)
