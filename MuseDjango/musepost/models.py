@@ -31,6 +31,11 @@ from taggit.models import TagBase, TaggedItemBase
 #         db_table = "MUSE_TaggedPost"
 #         verbose_name_plural = "해시태그-게시글"
 
+POST_CATEGORY = (
+    ("contest", "콘테스트"),
+    ("reference", "레퍼런스"),
+)
+
 
 class Post(models.Model):
     idx = models.AutoField(primary_key=True, null=False, blank=False)
@@ -71,10 +76,16 @@ class Post(models.Model):
     palette_color3 = models.CharField(
         max_length=200, null=True, blank=True, verbose_name="유사 색상3"
     )
-
+    category = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True,
+        choices=POST_CATEGORY,
+        verbose_name="게시물 카테고리",
+    )
     # 콘테스트 참가 여부 / 현재 상태 / 뮤즈 선정
-    is_reference = models.BooleanField(default=False, verbose_name="레퍼런스 게시물")
-    is_contest = models.BooleanField(default=True, verbose_name="콘테스트 게시물")
+    # is_reference = models.BooleanField(default=False, verbose_name="레퍼런스 게시물")
+    # is_contest = models.BooleanField(default=True, verbose_name="콘테스트 게시물")
     cur_status = models.BooleanField(default=True, verbose_name="현재 진행 여부")
     is_muse = models.BooleanField(default=False, verbose_name="MUSE 선정 여부")
 

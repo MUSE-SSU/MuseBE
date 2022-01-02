@@ -9,6 +9,8 @@ from accounts.models import User
 from .models import *
 from topics.models import Topic
 from django.db.models import F, Q, Count, Max
+import operator
+from functools import reduce
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -51,9 +53,8 @@ class PostViewSet(viewsets.ModelViewSet):
                     "content": content,
                     "image": image,
                     "hashtag": hashtag,
-                    "is_contest": False,
                     "cur_status": False,
-                    "is_reference": True,
+                    "category": upload_type,
                     "ref_url": ref_url,
                 }
 
@@ -74,9 +75,8 @@ class PostViewSet(viewsets.ModelViewSet):
                     "hashtag": hashtag,
                     "week": week,
                     "topic": topic,
-                    "is_contest": True,
+                    "category": upload_type,
                     "cur_status": True,
-                    "is_reference": False,
                 }
 
             serializer = PostUploadSerializer(data=data, partial=True)
@@ -103,17 +103,17 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({"message": "ERROR: POST LIST > REQUEST"}, status=400)
         try:
             if post_type == "cur-contest":
-                qs = Post.objects.filter(is_contest=True, cur_status=True)
+                qs = Post.objects.filter(category="contest", cur_status=True)
             elif post_type == "past-contest":
-                qs = Post.objects.filter(is_contest=True, cur_status=False)
+                qs = Post.objects.filter(category="contest", cur_status=False)
             elif post_type == "reference":
-                qs = Post.objects.filter(is_reference=True)
+                qs = Post.objects.filter(category="reference")
             else:
                 return Response({"message": "REQUEST ERROR"}, status=400)
 
-            page_size = 8
-            limit = int(page * page_size)
-            offset = int(limit - page_size)
+            PAGE_SIZE = 8
+            limit = int(page * PAGE_SIZE)
+            offset = int(limit - PAGE_SIZE)
 
             if order_by == "recent":
                 post = qs.order_by("-created_at")
@@ -198,7 +198,7 @@ class PostViewSet(viewsets.ModelViewSet):
         # GET host/post/preview_contest
         # 현재 진행 중인 콘테스트 4개 preview
         try:
-            qs = Post.objects.filter(is_contest=True, cur_status=True).order_by(
+            qs = Post.objects.filter(category="contest", cur_status=True).order_by(
                 "-likes", "-created_at"
             )
             POST_PREVIEW_COUNT = 4
@@ -220,7 +220,7 @@ class PostViewSet(viewsets.ModelViewSet):
         # GET host/post/preview_reference
         # 레퍼런스 4개 무작위 preview
         try:
-            qs = list(Post.objects.filter(is_reference=True))
+            qs = list(Post.objects.filter(category="reference"))
             POST_PREVIEW_COUNT = 4
             if len(qs) > POST_PREVIEW_COUNT:
                 post = random.sample(qs, POST_PREVIEW_COUNT)
@@ -311,6 +311,65 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({"is_bookmark": result}, status=200)
         except:
             return Response({"message": "ERROR: POST BOOKMARK"}, status=400)
+
+    @action(detail=True, methods=["get"])
+    def recommend_post(self, request, pk=None):
+        # GET host/post/pk/recommend_post/
+        # pk는 현재 보고있는 게시물의 idx
+        try:
+            page = int(request.query_params.get("page", 1))
+            current_post = Post.objects.get(idx=pk)
+        except:
+            return Response({"message": "ERROR: POST BOOKMARK > REQUEST"}, status=400)
+        try:
+            color = [
+                current_post.dominant_color,
+                current_post.palette_color1,
+                current_post.palette_color2,
+                current_post.palette_color3,
+            ]
+            dominant_query = reduce(
+                operator.or_, (Q(dominant_color__icontains=c) for c in color)
+            )
+            palette1_query = reduce(
+                operator.or_, (Q(palette_color1__icontains=c) for c in color)
+            )
+            palette2_query = reduce(
+                operator.or_, (Q(palette_color2__icontains=c) for c in color)
+            )
+            palette3_query = reduce(
+                operator.or_, (Q(palette_color3__icontains=c) for c in color)
+            )
+            recommend_post = (
+                Post.objects.filter(category=current_post.category)
+                .exclude(idx=pk)
+                .filter(
+                    dominant_query | palette1_query | palette2_query | palette3_query
+                )
+                .distinct()
+            )
+        except:
+            return Response({"message": "ERROR: POST RECOMMEND > RECOMMEND"}, status=400)
+        try:
+            PAGE_SIZE = 8
+            limit = int(page * PAGE_SIZE)
+            offset = int(limit - PAGE_SIZE)
+
+            count_post = recommend_post.count()
+
+            if count_post < offset:
+                return Response({"message": "POST COUNT LIMIT"}, status=201)
+            elif count_post < limit:
+                post_list = recommend_post[offset:count_post]
+            else:
+                post_list = recommend_post[offset:limit]
+
+            serializer = PostDisplayAllSerializer(
+                post_list, context={"request": request}, many=True
+            )
+            return Response(serializer.data, status=200)
+        except:
+            return Response({"message": "ERROR: POST RECOMMEND > LIST"}, status=400)
 
 
 class CommentViewSet(viewsets.ModelViewSet):

@@ -73,7 +73,7 @@ def print_hello():
 def select_muse():
     # 뮤즈 선정
     # 좋아요 가장 많이 받은 게시물, 동점의 경우, 조회수 더 많은 게시물
-    contest_post = Post.objects.filter(is_contest=True, cur_status=True)
+    contest_post = Post.objects.filter(category="contest", cur_status=True)
     muse_post = contest_post.order_by("-likes", "-views").first()
     muse_post.is_muse = True
     # 뮤즈 선정된 유저 뱃지 증가
