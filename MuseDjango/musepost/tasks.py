@@ -1,8 +1,11 @@
 from celery import shared_task
-from .models import Post
+from .models import Post, ColorOfWeek
 import logging
 from colorthief import ColorThief
 import webcolors
+from django.db.models import Count
+
+# from .color_constants import colors
 
 logger = logging.getLogger("celery")
 
@@ -29,6 +32,7 @@ def get_colour_name(requested_colour):
 
 @shared_task
 def get_image_color(post_idx):
+    """이미지 색상 추출"""
     try:
         post = Post.objects.get(idx=post_idx)
     except:
@@ -65,22 +69,70 @@ def get_image_color(post_idx):
 
 
 @shared_task
-def print_hello():
-    print("print hello world!!!")
-
-
-@shared_task
 def select_muse():
-    # 뮤즈 선정
+    """매주 일요일 00시: 뮤즈 선정"""
     # 좋아요 가장 많이 받은 게시물, 동점의 경우, 조회수 더 많은 게시물
-    contest_post = Post.objects.filter(is_contest=True, cur_status=True)
+    contest_post = Post.objects.filter(category="contest", cur_status=True)
     muse_post = contest_post.order_by("-likes", "-views").first()
     muse_post.is_muse = True
     # 뮤즈 선정된 유저 뱃지 증가
     muse_post.writer.profile.badge += 1
     muse_post.save()
 
-    # 게시물 현재 진행 상태 변경
-    for i in contest_post:
-        i.cur_status = False
-        i.save()
+
+@shared_task
+def change_post_status():
+    """매주 일요일 00시 30분: 이번 주의 전체 게시물(레퍼런스, 콘테스트) 현재 진행 상태 변경"""
+    all_cur_post = Post.objects.filter(cur_status=True)
+    all_cur_post.update(cur_status=False)
+
+
+@shared_task
+def select_week_color():
+    """매주 일요일 00시: 이번 주 가장 많이 사용된 색상 3가지"""
+    try:
+        week_post = Post.objects.filter(cur_status=True)
+        week_dominant_color = (
+            week_post.values("dominant_color")
+            .annotate(count=Count("dominant_color"))
+            .order_by("-count")
+        )
+
+        if week_dominant_color.count() >= 5:
+            cow = ColorOfWeek.objects.create(
+                color1=week_dominant_color[0]["dominant_color"],
+                color2=week_dominant_color[1]["dominant_color"],
+                color3=week_dominant_color[2]["dominant_color"],
+                color4=week_dominant_color[3]["dominant_color"],
+                color5=week_dominant_color[4]["dominant_color"],
+            )
+        else:
+            additional_color = []
+            for i, color in enumerate(week_dominant_color):
+                additional_color.append(color["dominant_color"])
+
+            week_palette_color = (
+                week_post.values("palette_color1")
+                .annotate(count=Count("palette_color1"))
+                .order_by("-count")
+            )
+
+            for i in range(5 - len(additional_color)):
+                additional_color.append(week_palette_color[i]["palette_color1"])
+
+            cow = ColorOfWeek.objects.create(
+                color1=additional_color[0],
+                color2=additional_color[1],
+                color3=additional_color[2],
+                color4=additional_color[3],
+                color5=additional_color[4],
+            )
+
+        # 지난 주 색상표 활성 상태 변경
+        if ColorOfWeek.objects.all().count() >= 2:
+            before_color_of_week = ColorOfWeek(idx=cow.idx - 1).cur_status = False
+            before_color_of_week.save()
+
+        logger.info(f"INFO: CREATE WEEKLY COLOR > {cow}")
+    except:
+        logger.error("ERROR: WEEKLY COLOR")

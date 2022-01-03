@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.text import slugify
 from common.upload_file import upload_profile_image
 from config.asset_storage import PublicMediaStorage
+from common.upload_file import upload_post_image
 
 
 class CustomUserManager(BaseUserManager):
@@ -82,11 +83,19 @@ class UserProfile(models.Model):
         related_name="profile",
         verbose_name="유저",
     )
-    badge = models.IntegerField(default=0, verbose_name="우승 뱃지")
-    avatar = models.ImageField(
-        blank=True,
+    badge = models.IntegerField(default=0, verbose_name="뱃지 개수")
+    rep_badge = models.ImageField(
+        upload_to=upload_post_image,
         storage=PublicMediaStorage(),
+        blank=True,
+        null=True,
+        verbose_name="대표 뱃지",
+    )
+    avatar = models.ImageField(
         upload_to=upload_profile_image,
+        storage=PublicMediaStorage(),
+        blank=True,
+        null=True,
         verbose_name="프로필 사진",
     )
     self_introduce = models.CharField(

@@ -19,8 +19,7 @@ class PostUploadSerializer(TaggitSerializer, serializers.ModelSerializer):
             "topic",
             "hashtag",
             "ref_url",
-            "is_reference",
-            "is_contest",
+            "category",
             "cur_status",
         )
 
@@ -130,7 +129,6 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
     is_writer = serializers.SerializerMethodField()
     is_login_user_follow = serializers.SerializerMethodField()
     is_login_user_bookmark = serializers.SerializerMethodField()
-    # writer_other_post = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -222,29 +220,14 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             else False
         )
 
-    # def get_writer_other_post(self, obj):
-    #     try:
-    #         login_user = self.context.get("request")
-    #         post_obj = Post.objects.filter(writer=obj.writer, is_contest=True).exclude(
-    #             idx=obj.idx
-    #         )
-    #         if post_obj.exists():
-    #             count_post = post_obj.count()
-    #             if count_post >= 6:
-    #                 post_obj = post_obj[:6]
-    #             elif 1 <= count_post < 6:
-    #                 post_obj = post_obj[:count_post]
-    #             srl = PostDisplayAllSerializer(
-    #                 post_obj, context={"request": login_user}, many=True
-    #             )
-    #             return srl.data
-    #         else:
-    #             return None
-    #     except:
-    #         return None
-
 
 class CommentUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
+        fields = "__all__"
+
+
+class ColorOfWeekSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ColorOfWeek
         fields = "__all__"
