@@ -20,7 +20,7 @@ app.conf.beat_schedule = {
     # 1분마다 hello celery world!! 출력
     # "colororor": {
     #     "task": "musepost.tasks.select_week_color",
-    #     "schedule": 60.0
+    #     "schedule": 10.0
     #     # 로컬에서는 crontab 작동이 안함.. -> 5.0 5초 이걸로 작동시킴. crontab(minute=1, hour=0) ec2 올려서 확인해볼 것
     # }
 }

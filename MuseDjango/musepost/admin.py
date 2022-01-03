@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import *
+
+from .color_constants import COLOR_CHECK
 from colorthief import ColorThief
 import webcolors
 
@@ -27,14 +29,10 @@ def get_colour_name(requested_colour):
 def admin_get_image_color(modeladmin, request, queryset):
     for post in queryset:
         color_thief = ColorThief(post.image)
+
         # get domminat color
         dominant_color = color_thief.get_color(quality=1)
         dominant_actual_name, dominant_closest_name = get_colour_name(dominant_color)
-
-        if dominant_actual_name:
-            post.dominant_color = dominant_actual_name
-        else:
-            post.dominant_color = dominant_closest_name
 
         # get palette color
         palette = color_thief.get_palette(color_count=3)
@@ -46,9 +44,27 @@ def admin_get_image_color(modeladmin, request, queryset):
             else:
                 plt_name.append(plt_closest_name)
 
-        post.palette_color1 = plt_name[0]
-        post.palette_color2 = plt_name[1]
-        post.palette_color3 = plt_name[2]
+        # Replace Color Name with Spacing & Upper Case
+        temp_colors = []
+        if dominant_actual_name:
+            temp_colors.append(dominant_actual_name)
+        else:
+            temp_colors.append(dominant_closest_name)
+        temp_colors.extend(plt_name)
+
+        replace_colors = []
+        for idx, full_color in enumerate(temp_colors):
+            replace_color_name = full_color
+            for key, value in COLOR_CHECK.items():
+                if key in replace_color_name:
+                    replace_color_name = replace_color_name.replace(key, value + " ")
+            replace_colors.append(replace_color_name.rstrip())
+
+        # save color
+        post.dominant_color = replace_colors[0]
+        post.palette_color1 = replace_colors[1]
+        post.palette_color2 = replace_colors[2]
+        post.palette_color3 = replace_colors[3]
 
         post.save()
 
@@ -116,6 +132,19 @@ class CommentAdmin(admin.ModelAdmin):
     get_writer_id.short_description = "댓글 작성자"  # Renames column head
 
 
+class ColorOfWeekAdmin(admin.ModelAdmin):
+    list_display = [
+        "idx",
+        "color1",
+        "color2",
+        "color3",
+        "color4",
+        "color5",
+        "cur_status",
+    ]
+
+
 admin.site.register(Post, PostAdmin)
 admin.site.register(PostLike, PostLikeAdmin)
 admin.site.register(Comment, CommentAdmin)
+admin.site.register(ColorOfWeek, ColorOfWeekAdmin)
