@@ -225,3 +225,9 @@ class CommentUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = "__all__"
+
+
+class ColorOfWeekSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ColorOfWeek
+        fields = "__all__"

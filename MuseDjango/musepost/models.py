@@ -7,30 +7,6 @@ from taggit.managers import TaggableManager
 from taggit.models import TagBase, TaggedItemBase
 
 
-# class Tag(TagBase):
-#     slug = models.SlugField(
-#         verbose_name="slug",
-#         unique=True,
-#         max_length=100,
-#         allow_unicode=True,
-#     )
-
-#     class Meta:
-#         db_table = "MUSE_Tag"
-#         verbose_name_plural = "해시태그"
-
-
-# # Tag와 Tag가 달리는 게시글 연결하는 N:M 중개모델
-# class TaggedPost(TaggedItemBase):
-#     post = models.ForeignKey("Post", on_delete=models.CASCADE)
-#     tags = models.ForeignKey(
-#         "Tag", related_name="tagged_post", on_delete=models.CASCADE, null=True
-#     )
-
-#     class Meta:
-#         db_table = "MUSE_TaggedPost"
-#         verbose_name_plural = "해시태그-게시글"
-
 POST_CATEGORY = (
     ("contest", "콘테스트"),
     ("reference", "레퍼런스"),
@@ -65,16 +41,16 @@ class Post(models.Model):
 
     # post color
     dominant_color = models.CharField(
-        max_length=200, null=True, blank=True, verbose_name="지배 색상"
+        max_length=50, null=True, blank=True, verbose_name="지배 색상"
     )
     palette_color1 = models.CharField(
-        max_length=200, null=True, blank=True, verbose_name="유사 색상1"
+        max_length=50, null=True, blank=True, verbose_name="유사 색상1"
     )
     palette_color2 = models.CharField(
-        max_length=200, null=True, blank=True, verbose_name="유사 색상2"
+        max_length=50, null=True, blank=True, verbose_name="유사 색상2"
     )
     palette_color3 = models.CharField(
-        max_length=200, null=True, blank=True, verbose_name="유사 색상3"
+        max_length=50, null=True, blank=True, verbose_name="유사 색상3"
     )
     category = models.CharField(
         max_length=30,
@@ -86,7 +62,7 @@ class Post(models.Model):
     # 콘테스트 참가 여부 / 현재 상태 / 뮤즈 선정
     # is_reference = models.BooleanField(default=False, verbose_name="레퍼런스 게시물")
     # is_contest = models.BooleanField(default=True, verbose_name="콘테스트 게시물")
-    cur_status = models.BooleanField(default=True, verbose_name="현재 진행 여부")
+    cur_status = models.BooleanField(default=True, verbose_name="이번 주 게시물")
     is_muse = models.BooleanField(default=False, verbose_name="MUSE 선정 여부")
 
     created_at = models.DateTimeField(verbose_name="최초 업로드 날짜", auto_now_add=True)
@@ -119,6 +95,7 @@ class PostLike(models.Model):
         verbose_name="좋아요 누른 유저",
         default="default",
     )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "MUSE_Post_Like"
@@ -141,6 +118,7 @@ class PostBookmark(models.Model):
         db_column="user_bookmark",
         verbose_name="유저 북마크",
     )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "MUSE_Post_Bookmark"
@@ -180,3 +158,18 @@ class Comment(models.Model):
     class Meta:
         db_table = "MUSE_Post_Comments"
         verbose_name_plural = "댓글"
+
+
+class ColorOfWeek(models.Model):
+    idx = models.AutoField(primary_key=True, null=False, blank=False)
+    color1 = models.CharField(max_length=50)
+    color2 = models.CharField(max_length=50)
+    color3 = models.CharField(max_length=50)
+    color4 = models.CharField(max_length=50)
+    color5 = models.CharField(max_length=50)
+
+    cur_status = models.BooleanField(default=True, verbose_name="이번 주 색상")
+
+    class Meta:
+        db_table = "MUSE_ColorOfWeek"
+        verbose_name_plural = "이번 주 색상"

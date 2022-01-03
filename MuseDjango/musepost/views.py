@@ -53,7 +53,6 @@ class PostViewSet(viewsets.ModelViewSet):
                     "content": content,
                     "image": image,
                     "hashtag": hashtag,
-                    "cur_status": False,
                     "category": upload_type,
                     "ref_url": ref_url,
                 }
@@ -76,7 +75,6 @@ class PostViewSet(viewsets.ModelViewSet):
                     "week": week,
                     "topic": topic,
                     "category": upload_type,
-                    "cur_status": True,
                 }
 
             serializer = PostUploadSerializer(data=data, partial=True)
@@ -194,6 +192,19 @@ class PostViewSet(viewsets.ModelViewSet):
         return Response({"message": "POST DELETE SUCCESS"}, status=200)
 
     @action(detail=False, methods=["get"])
+    def color_of_week(self, request):
+        # GET host/api/post/color_of_week/
+        try:
+            qs = ColorOfWeek.objects.get(cur_status=True)
+            result = {}
+            result["color"]=[qs.color1, qs.color2, qs.color3, qs.color4, qs.color5]
+
+            # serializer = ColorOfWeekSerializer(qs)
+            return Response(result, status=200)
+        except:
+            return Response({"message": "ERROR: COLOR OF WEEK"}, status=400)
+
+    @action(detail=False, methods=["get"])
     def preview_contest(self, request):
         # GET host/post/preview_contest
         # 현재 진행 중인 콘테스트 4개 preview
@@ -279,8 +290,9 @@ class PostViewSet(viewsets.ModelViewSet):
         # POST host/post/pk/like/
         try:
             post = Post.objects.get(idx=pk)
-            user = User.objects.get(user_id=request.user.user_id)
-            like, is_liked = PostLike.objects.get_or_create(post=post, like_user=user)
+            like, is_liked = PostLike.objects.get_or_create(
+                post=post, like_user=request.user
+            )
             if not is_liked:
                 like.delete()
                 result = False
@@ -295,10 +307,10 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def bookmark(self, request, pk=None):
-        # POST host/post/pk/bookmark/
+        # POST host/api/post/pk/bookmark/
         try:
             post = Post.objects.get(idx=pk)
-            user = User.objects.get(user_id=request.user.user_id)
+            user = User.objects.get(user_id=request.user)
             bookmark, is_bookmarked = PostBookmark.objects.get_or_create(
                 post=post, user=user
             )
@@ -313,8 +325,8 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({"message": "ERROR: POST BOOKMARK"}, status=400)
 
     @action(detail=True, methods=["get"])
-    def recommend_post(self, request, pk=None):
-        # GET host/post/pk/recommend_post/?page=
+    def recommend(self, request, pk=None):
+        # GET host/api/post/pk/recommend/?page=
         # pk는 현재 보고있는 게시물의 idx
         try:
             page = int(request.query_params.get("page", 1))
@@ -324,28 +336,27 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             color = [
                 current_post.dominant_color,
-                current_post.palette_color1,
-                current_post.palette_color2,
-                current_post.palette_color3,
+                # current_post.palette_color1,
+                # current_post.palette_color2,
+                # current_post.palette_color3,
             ]
             dominant_query = reduce(
                 operator.or_, (Q(dominant_color__icontains=c) for c in color)
             )
-            palette1_query = reduce(
-                operator.or_, (Q(palette_color1__icontains=c) for c in color)
-            )
-            palette2_query = reduce(
-                operator.or_, (Q(palette_color2__icontains=c) for c in color)
-            )
-            palette3_query = reduce(
-                operator.or_, (Q(palette_color3__icontains=c) for c in color)
-            )
+            # palette1_query = reduce(
+            #     operator.or_, (Q(palette_color1__icontains=c) for c in color)
+            # )
+            # palette2_query = reduce(
+            #     operator.or_, (Q(palette_color2__icontains=c) for c in color)
+            # )
+            # palette3_query = reduce(
+            #     operator.or_, (Q(palette_color3__icontains=c) for c in color)
+            # )
+            # | palette1_query | palette2_query | palette3_query
             recommend_post = (
                 Post.objects.filter(category=current_post.category)
                 .exclude(idx=pk)
-                .filter(
-                    dominant_query | palette1_query | palette2_query | palette3_query
-                )
+                .filter(dominant_query)
                 .distinct()
             )
         except:
@@ -426,6 +437,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response({"message": "REQUEST ERROR"}, status=400)
 
 
+'''
 @authorization_validator
 def post_reference_upload(request):
     if request.method == "POST":
@@ -862,3 +874,4 @@ def comment_delete(request, comment_idx):
         return JsonResponse({"message": "DELETE SUCCESS"}, status=200)
     else:
         return JsonResponse({"message": "ACCESS METHOD ERROR"}, status=400)
+'''
