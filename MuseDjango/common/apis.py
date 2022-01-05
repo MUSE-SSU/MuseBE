@@ -29,6 +29,8 @@ def integrated_search(request):
                 if user_queryset:
                     user_serializer = UserInfoSerializer(user_queryset, many=True)
                     result["user"] = user_serializer.data
+                else:
+                    result["user"] = None
 
                 # 게시물 검색
                 post_title_query = reduce(
@@ -52,11 +54,10 @@ def integrated_search(request):
                         post_queryset, context={"request": request}, many=True
                     )
                     result["post"] = post_serializer.data
-
-                if result:
-                    return JsonResponse(result, safe=False, status=200)
                 else:
-                    return JsonResponse({"message": "NO SEARCH LIST"}, status=200)
+                    result["post"] = None
+
+                return JsonResponse(result, safe=False, status=200)
         except:
             return JsonResponse({"message": "ERROR: SEARCH"}, status=400)
     else:

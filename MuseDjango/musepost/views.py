@@ -196,11 +196,8 @@ class PostViewSet(viewsets.ModelViewSet):
         # GET host/api/post/color_of_week/
         try:
             qs = ColorOfWeek.objects.get(cur_status=True)
-            result = {}
-            result["color"]=[qs.color1, qs.color2, qs.color3, qs.color4, qs.color5]
-
-            # serializer = ColorOfWeekSerializer(qs)
-            return Response(result, status=200)
+            serializer = ColorOfWeekSerializer(qs)
+            return Response(serializer.data, status=200)
         except:
             return Response({"message": "ERROR: COLOR OF WEEK"}, status=400)
 

@@ -3,6 +3,7 @@ from taggit_serializer.serializers import TagListSerializerField, TaggitSerializ
 from .models import *
 from accounts.models import *
 from config.settings import MEDIA_URL
+from .color_constants import COLORS_TO_HEXA
 
 
 class PostUploadSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -228,6 +229,36 @@ class CommentUploadSerializer(serializers.ModelSerializer):
 
 
 class ColorOfWeekSerializer(serializers.ModelSerializer):
+    color = serializers.SerializerMethodField()
+    hexa_code = serializers.SerializerMethodField()
+
     class Meta:
         model = ColorOfWeek
-        fields = "__all__"
+        fields = ("color", "hexa_code")
+
+    def get_color(self, obj):
+        return [obj.color1, obj.color2, obj.color3, obj.color4, obj.color5]
+
+    def get_hexa_code(self, obj):
+        result = []
+        try:
+            result.append(COLORS_TO_HEXA.get(obj.color1))
+        except:
+            result.append("#0000ffff")
+        try:
+            result.append(COLORS_TO_HEXA.get(obj.color2))
+        except:
+            result.append("#0000ffff")
+        try:
+            result.append(COLORS_TO_HEXA.get(obj.color3))
+        except:
+            result.append("#0000ffff")
+        try:
+            result.append(COLORS_TO_HEXA.get(obj.color4))
+        except:
+            result.append("#0000ffff")
+        try:
+            result.append(COLORS_TO_HEXA.get(obj.color5))
+        except:
+            result.append("#0000ffff")
+        return result
