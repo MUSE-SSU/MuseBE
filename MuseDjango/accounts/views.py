@@ -114,8 +114,8 @@ class UserViewSet(viewsets.ModelViewSet):
         # PATCH host/account/pk(nickname)/
         try:
             nickname = request.data.get("nickname", None)
-            self_introduce = request.data.get("self_introduce", "")
-            avatar = request.data.get("avatar", "default_avatar.png")
+            self_introduce = request.data.get("self_introduce", None)
+            avatar = request.data.get("avatar", None)
         except:
             return Response({"message": "ERROR: USER UPDATE > REQUEST"}, status=400)
 
@@ -123,14 +123,16 @@ class UserViewSet(viewsets.ModelViewSet):
             if User.objects.filter(user_id=request.user, nickname=pk).exists():
                 if nickname:
                     request.user.nickname = nickname
-                request.user.profile.avatar = avatar
-                request.user.profile.self_introduce = self_introduce
-
+                if self_introduce:
+                    request.user.profile.self_introduce = self_introduce
+                if avatar:
+                    request.user.profile.avatar = avatar
+                
                 request.user.save()
                 request.user.profile.save()
                 return Response({"message": "SUCCESS"}, status=200)
             else:
-                return Response({"message": "ERROR: USER UPDATE"}, status=400)
+                return Response({"message": "ERROR: USER UPDATE > NONE"}, status=400)
         except:
             return Response({"message": "ERROR: USER UPDATE"}, status=400)
 
