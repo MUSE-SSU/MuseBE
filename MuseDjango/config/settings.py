@@ -3,6 +3,17 @@ from pathlib import Path
 import os
 import my_settings
 
+STAGE = os.environ.get("STAGE", "DEV")
+if STAGE == "DEV":
+    DEV = True
+    DEBUG = True
+elif STAGE == "PROD":
+    DEV = False
+    DEBUG = False
+else:  # for unintentional case
+    DEBUG = False
+    DEV = False
+
 DATABASES = my_settings.DATABASES
 SECRET_KEY = my_settings.SECRET_KEY
 SECRET_ALGORITHM = my_settings.SECRET_ALGORITHM
@@ -11,8 +22,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-
-DEBUG = False
 
 ALLOWED_HOSTS = [
     "ec2-52-14-157-45.us-east-2.compute.amazonaws.com",
