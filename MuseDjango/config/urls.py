@@ -6,10 +6,17 @@ from accounts import views as account_views
 from musepost import views as post_views
 from notice import views as notice_views
 from common import apis as common_apis
+from .settings import DEV
 
-admin.site.site_header = "⚡️ Muse DB ⚡️"
-admin.site.site_title = "⚡️ Muse DB ⚡️"
-admin.site.index_title = "⚡️ Muse 관리 ⚡️"
+if DEV:
+    admin.site.site_header = "⚡️ Muse 개발 DB ⚡️"
+    admin.site.site_title = "⚡️ Muse 개발 DB ⚡️"
+    admin.site.index_title = "⚡️ Muse 개발 ⚡️"
+else:  # PROD
+    admin.site.site_header = "⚡️ Muse 실제 DB ⚡️"
+    admin.site.site_title = "⚡️ Muse 실제 DB ⚡️"
+    admin.site.index_title = "⚡️ Muse 실제 ⚡️"
+
 
 router = DefaultRouter()
 router.register(r"account", account_views.UserViewSet, basename="account")
