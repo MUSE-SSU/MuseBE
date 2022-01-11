@@ -56,7 +56,7 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = "user_id"
 
     def __str__(self):
-        return str(self.user_id)
+        return str(self.nickname)
 
     @property
     def is_staff(self):

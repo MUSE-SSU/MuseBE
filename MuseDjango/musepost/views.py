@@ -23,6 +23,9 @@ from common.authentication import (
 from .serializers import *
 import random
 from .tasks import get_image_color
+import logging
+
+logger = logging.getLogger("api")
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -34,7 +37,7 @@ class PostViewSet(viewsets.ModelViewSet):
     def create(self, request):
         # POST host/post/
         try:
-            upload_type = request.data.get("type", None)
+            upload_type = request.data.get("upload_type", None)
             title = request.data.get("title", None)
             content = request.data.get("content", None)
             image = request.data.get("image", None)
@@ -259,16 +262,6 @@ class PostViewSet(viewsets.ModelViewSet):
         except:
             return Response({"message": "ERROR: PREVIEW MUSE"}, status=400)
 
-    @action(detail=True, methods=["get"])
-    def other_reference(self, request, pk=None):
-        # GET host/post/pk/other_reference/
-        pass
-
-    @action(detail=True, methods=["get"])
-    def other_contest(self, request, pk=None):
-        # GET host/post/pk/other_contest/
-        pass
-
     @action(detail=False, methods=["get"])
     def list_muse(self, request):
         # GET host/post/list_muse
@@ -333,27 +326,28 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             color = [
                 current_post.dominant_color,
-                # current_post.palette_color1,
-                # current_post.palette_color2,
-                # current_post.palette_color3,
+                current_post.palette_color1,
+                current_post.palette_color2,
+                current_post.palette_color3,
             ]
             dominant_query = reduce(
                 operator.or_, (Q(dominant_color__icontains=c) for c in color)
             )
-            # palette1_query = reduce(
-            #     operator.or_, (Q(palette_color1__icontains=c) for c in color)
-            # )
-            # palette2_query = reduce(
-            #     operator.or_, (Q(palette_color2__icontains=c) for c in color)
-            # )
-            # palette3_query = reduce(
-            #     operator.or_, (Q(palette_color3__icontains=c) for c in color)
-            # )
-            # | palette1_query | palette2_query | palette3_query
+            palette1_query = reduce(
+                operator.or_, (Q(palette_color1__icontains=c) for c in color)
+            )
+            palette2_query = reduce(
+                operator.or_, (Q(palette_color2__icontains=c) for c in color)
+            )
+            palette3_query = reduce(
+                operator.or_, (Q(palette_color3__icontains=c) for c in color)
+            )
             recommend_post = (
                 Post.objects.filter(category=current_post.category)
                 .exclude(idx=pk)
-                .filter(dominant_query)
+                .filter(
+                    dominant_query | palette1_query | palette2_query | palette3_query
+                )
                 .distinct()
             )
         except:
