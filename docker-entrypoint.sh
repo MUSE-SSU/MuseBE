@@ -12,11 +12,9 @@ else
         # python3 manage.py makemigrations --noinput
         # python3 manage.py migrate
         # python3 manage.py migrate --fake
-        # python3 manage.py collectstatic --noinput
-
 
         echo "-----Collect Static-----"
-        python3 manage.py collectstatic --noinput
+        # python3 manage.py collectstatic --noinput
 
         echo "-----Start Gunicorn-----"
         exec gunicorn config.wsgi:application \
