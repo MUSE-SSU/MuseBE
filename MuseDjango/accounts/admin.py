@@ -24,7 +24,7 @@ class UserProfileAdmin(admin.ModelAdmin):
     def get_avatar(self, obj):
         return str(obj.avatar)
 
-    get_user_id.short_description = "유저 닉네임"  # Renames column head
+    get_user_id.short_description = "닉네임"  # Renames column head
     get_avatar.short_description = "프로필 사진"  # Renames column head
     # get_user_id.admin_order_field  = 'author'  #Allows column order sorting
 

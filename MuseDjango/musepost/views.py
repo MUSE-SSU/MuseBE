@@ -27,6 +27,11 @@ import logging
 
 logger = logging.getLogger("api")
 
+UPLOAD_POST_SCORE = 50
+UPLOAD_COMMENT_SCORE = 1
+LIKE_SCORE = 1
+BOOKMARK_SCORE = 1
+
 
 class PostViewSet(viewsets.ModelViewSet):
     """Post API"""
@@ -83,6 +88,9 @@ class PostViewSet(viewsets.ModelViewSet):
             serializer = PostUploadSerializer(data=data, partial=True)
             if serializer.is_valid():
                 uploaded_post = serializer.save()
+                # 게시물 등록 점수
+                request.user.profile.score += UPLOAD_POST_SCORE
+                request.user.profile.save()
                 # 이미지 색상 추출
                 get_image_color.delay(uploaded_post.idx)
 
@@ -287,9 +295,14 @@ class PostViewSet(viewsets.ModelViewSet):
                 like.delete()
                 result = False
                 post.likes -= 1
+                # 좋아요 점수 취소
+                request.user.profile.score -= LIKE_SCORE
             else:
                 result = True
                 post.likes += 1
+                # 좋아요 점수
+                request.user.profile.score += LIKE_SCORE
+            request.user.profile.save()
             post.save()
             return Response({"is_like": result}, status=200)
         except:
@@ -307,8 +320,13 @@ class PostViewSet(viewsets.ModelViewSet):
             if not is_bookmarked:
                 bookmark.delete()
                 result = False
+                # 북마크 점수 취소
+                request.user.profile.score -= BOOKMARK_SCORE
             else:
                 result = True
+                # 북마크 점수
+                request.user.profile.score += BOOKMARK_SCORE
+            request.user.profile.save()
             bookmark.save()
             return Response({"is_bookmark": result}, status=200)
         except:
@@ -396,6 +414,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 
             if serializer.is_valid():
                 serializer.save()
+                # 댓글 등록 점수
+                request.user.profile.score += UPLOAD_COMMENT_SCORE
+                request.user.profile.save()
+
                 return Response({"message": "SUCCESS"}, status=200)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except:

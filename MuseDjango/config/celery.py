@@ -17,10 +17,16 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
-    # 1분마다 hello celery world!! 출력
-    # "colororor": {
-    #     "task": "musepost.tasks.select_week_color",
-    #     "schedule": 10.0
+    # 유저 Score 계산
+    # "calc_score": {
+    #     "task": "accounts.tasks.calc_user_score_to_badge",
+    #     "schedule": 60.0
+    #     # 로컬에서는 crontab 작동이 안함.. -> 5.0 5초 이걸로 작동시킴. crontab(minute=1, hour=0) ec2 올려서 확인해볼 것
+    # },
+    # Muse 선정
+    # "": {
+    #     "task": "",
+    #     "schedule": 60.0
     #     # 로컬에서는 crontab 작동이 안함.. -> 5.0 5초 이걸로 작동시킴. crontab(minute=1, hour=0) ec2 올려서 확인해볼 것
     # }
 }

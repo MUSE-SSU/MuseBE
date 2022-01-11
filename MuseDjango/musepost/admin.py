@@ -141,8 +141,8 @@ class CommentAdmin(admin.ModelAdmin):
     def get_writer_id(self, obj):
         return obj.writer.nickname
 
-    get_post_id.short_description = "게시글"  # Renames column head
-    get_writer_id.short_description = "댓글 작성자"  # Renames column head
+    get_post_id.short_description = "게시글"
+    get_writer_id.short_description = "작성자"
 
 
 class ColorOfWeekAdmin(admin.ModelAdmin):
