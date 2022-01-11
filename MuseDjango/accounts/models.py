@@ -56,7 +56,7 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = "user_id"
 
     def __str__(self):
-        return str(self.user_id)
+        return str(self.nickname)
 
     @property
     def is_staff(self):
@@ -83,14 +83,6 @@ class UserProfile(models.Model):
         related_name="profile",
         verbose_name="유저",
     )
-    badge = models.IntegerField(default=0, verbose_name="뱃지 개수")
-    rep_badge = models.ImageField(
-        upload_to=upload_post_image,
-        storage=PublicMediaStorage(),
-        blank=True,
-        null=True,
-        verbose_name="대표 뱃지",
-    )
     avatar = models.ImageField(
         upload_to=upload_profile_image,
         storage=PublicMediaStorage(),
@@ -99,11 +91,13 @@ class UserProfile(models.Model):
         verbose_name="프로필 사진",
     )
     self_introduce = models.CharField(
-        max_length=100, blank=True, null=True, verbose_name="자기 소개"
+        max_length=300, blank=True, null=True, verbose_name="자기 소개"
     )
     instar_id = models.CharField(
-        max_length=100, blank=True, null=True, verbose_name="인스타 ID"
+        max_length=100, blank=True, null=True, verbose_name="인스타ID"
     )
+    score = models.PositiveIntegerField(default=0, verbose_name="유저 점수")
+    badge = models.PositiveIntegerField(default=0, verbose_name="뱃지 단계")
 
     def __str__(self):
         return str(self.user)

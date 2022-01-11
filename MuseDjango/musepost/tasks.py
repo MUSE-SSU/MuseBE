@@ -7,7 +7,9 @@ from colorthief import ColorThief
 import webcolors
 from .color_constants import COLOR_CHECK
 
-logger = logging.getLogger("celery")
+logger = logging.getLogger("api")
+
+MUSE_SCORE = 100000
 
 
 def closest_colour(requested_colour):
@@ -88,8 +90,8 @@ def select_muse():
     contest_post = Post.objects.filter(category="contest", cur_status=True)
     muse_post = contest_post.order_by("-likes", "-views").first()
     muse_post.is_muse = True
-    # 뮤즈 선정된 유저 뱃지 증가
-    muse_post.writer.profile.badge += 1
+    # 뮤즈 선정 점수
+    muse_post.writer.profile.score = MUSE_SCORE
     muse_post.save()
 
 

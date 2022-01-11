@@ -77,13 +77,13 @@ class PostAdmin(admin.ModelAdmin):
         "idx",
         "writer",
         "title",
-        "image",
+        "get_image",
         "content",
         "views",
         "likes",
         "topic",
         "week",
-        "hashtag",
+        "get_hashtag",
         "ref_url",
         "dominant_color",
         "palette_color1",
@@ -95,6 +95,19 @@ class PostAdmin(admin.ModelAdmin):
         "created_at",
         "modified_at",
     ]
+
+    def get_image(self, obj):
+        return str(obj.image)[:22]
+
+    def get_hashtag(self, obj):
+        tags = []
+        for tag in obj.hashtag.all():
+            tags.append(str(tag))
+        return ", ".join(tags)
+
+    get_image.short_description = "이미지"
+    get_hashtag.short_description = "해시태그"
+
     actions = [admin_get_image_color]
     list_per_page = 20
 
@@ -128,8 +141,8 @@ class CommentAdmin(admin.ModelAdmin):
     def get_writer_id(self, obj):
         return obj.writer.nickname
 
-    get_post_id.short_description = "게시글"  # Renames column head
-    get_writer_id.short_description = "댓글 작성자"  # Renames column head
+    get_post_id.short_description = "게시글"
+    get_writer_id.short_description = "작성자"
 
 
 class ColorOfWeekAdmin(admin.ModelAdmin):

@@ -23,6 +23,14 @@ from common.authentication import (
 from .serializers import *
 import random
 from .tasks import get_image_color
+import logging
+
+logger = logging.getLogger("api")
+
+UPLOAD_POST_SCORE = 50
+UPLOAD_COMMENT_SCORE = 1
+LIKE_SCORE = 1
+BOOKMARK_SCORE = 1
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -34,7 +42,7 @@ class PostViewSet(viewsets.ModelViewSet):
     def create(self, request):
         # POST host/post/
         try:
-            upload_type = request.data.get("type", None)
+            upload_type = request.data.get("upload_type", None)
             title = request.data.get("title", None)
             content = request.data.get("content", None)
             image = request.data.get("image", None)
@@ -80,6 +88,9 @@ class PostViewSet(viewsets.ModelViewSet):
             serializer = PostUploadSerializer(data=data, partial=True)
             if serializer.is_valid():
                 uploaded_post = serializer.save()
+                # 게시물 등록 점수
+                request.user.profile.score += UPLOAD_POST_SCORE
+                request.user.profile.save()
                 # 이미지 색상 추출
                 get_image_color.delay(uploaded_post.idx)
 
@@ -259,16 +270,6 @@ class PostViewSet(viewsets.ModelViewSet):
         except:
             return Response({"message": "ERROR: PREVIEW MUSE"}, status=400)
 
-    @action(detail=True, methods=["get"])
-    def other_reference(self, request, pk=None):
-        # GET host/post/pk/other_reference/
-        pass
-
-    @action(detail=True, methods=["get"])
-    def other_contest(self, request, pk=None):
-        # GET host/post/pk/other_contest/
-        pass
-
     @action(detail=False, methods=["get"])
     def list_muse(self, request):
         # GET host/post/list_muse
@@ -294,9 +295,14 @@ class PostViewSet(viewsets.ModelViewSet):
                 like.delete()
                 result = False
                 post.likes -= 1
+                # 좋아요 점수 취소
+                request.user.profile.score -= LIKE_SCORE
             else:
                 result = True
                 post.likes += 1
+                # 좋아요 점수
+                request.user.profile.score += LIKE_SCORE
+            request.user.profile.save()
             post.save()
             return Response({"is_like": result}, status=200)
         except:
@@ -314,8 +320,13 @@ class PostViewSet(viewsets.ModelViewSet):
             if not is_bookmarked:
                 bookmark.delete()
                 result = False
+                # 북마크 점수 취소
+                request.user.profile.score -= BOOKMARK_SCORE
             else:
                 result = True
+                # 북마크 점수
+                request.user.profile.score += BOOKMARK_SCORE
+            request.user.profile.save()
             bookmark.save()
             return Response({"is_bookmark": result}, status=200)
         except:
@@ -333,27 +344,28 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             color = [
                 current_post.dominant_color,
-                # current_post.palette_color1,
-                # current_post.palette_color2,
-                # current_post.palette_color3,
+                current_post.palette_color1,
+                current_post.palette_color2,
+                current_post.palette_color3,
             ]
             dominant_query = reduce(
                 operator.or_, (Q(dominant_color__icontains=c) for c in color)
             )
-            # palette1_query = reduce(
-            #     operator.or_, (Q(palette_color1__icontains=c) for c in color)
-            # )
-            # palette2_query = reduce(
-            #     operator.or_, (Q(palette_color2__icontains=c) for c in color)
-            # )
-            # palette3_query = reduce(
-            #     operator.or_, (Q(palette_color3__icontains=c) for c in color)
-            # )
-            # | palette1_query | palette2_query | palette3_query
+            palette1_query = reduce(
+                operator.or_, (Q(palette_color1__icontains=c) for c in color)
+            )
+            palette2_query = reduce(
+                operator.or_, (Q(palette_color2__icontains=c) for c in color)
+            )
+            palette3_query = reduce(
+                operator.or_, (Q(palette_color3__icontains=c) for c in color)
+            )
             recommend_post = (
                 Post.objects.filter(category=current_post.category)
                 .exclude(idx=pk)
-                .filter(dominant_query)
+                .filter(
+                    dominant_query | palette1_query | palette2_query | palette3_query
+                )
                 .distinct()
             )
         except:
@@ -402,6 +414,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 
             if serializer.is_valid():
                 serializer.save()
+                # 댓글 등록 점수
+                request.user.profile.score += UPLOAD_COMMENT_SCORE
+                request.user.profile.save()
+
                 return Response({"message": "SUCCESS"}, status=200)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except:
