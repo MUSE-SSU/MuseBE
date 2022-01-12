@@ -2,6 +2,7 @@ from rest_framework import serializers
 from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
 from .models import *
 from accounts.models import *
+from accounts.serializers import *
 from config.settings import MEDIA_URL
 from .color_constants import COLORS_TO_HEXA
 
@@ -36,6 +37,7 @@ class PostDisplayAllSerializer(serializers.ModelSerializer):
     writer_avatar = serializers.SerializerMethodField()
     is_login_user_liked = serializers.SerializerMethodField()
     is_writer = serializers.SerializerMethodField()
+    badge = serializers.SerializerMethodField()
 
     class Meta:
         # 무한스크롤 페이지
@@ -44,6 +46,7 @@ class PostDisplayAllSerializer(serializers.ModelSerializer):
             "idx",
             "writer",
             "writer_avatar",
+            "badge",
             "title",
             "content",
             "image",
@@ -55,6 +58,13 @@ class PostDisplayAllSerializer(serializers.ModelSerializer):
             "is_login_user_liked",
             "is_writer",
         )
+
+    def get_badge(self, obj):
+        try:
+            user = UserProfile.objects.get(user=obj.writer)
+            return user.badge
+        except:
+            return 0
 
     # noinspection PyMethodMayBeStatic
     def get_writer_avatar(self, obj):
@@ -89,6 +99,7 @@ class CommentDisplaySerializer(serializers.ModelSerializer):
     writer = serializers.SlugRelatedField(slug_field="nickname", read_only=True)
     is_writer = serializers.SerializerMethodField()
     writer_avatar = serializers.SerializerMethodField()
+    badge = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -96,11 +107,19 @@ class CommentDisplaySerializer(serializers.ModelSerializer):
             "idx",
             "writer",
             "writer_avatar",
+            "badge",
             "comment",
             "is_writer",
             "created_at",
             "modified_at",
         )
+
+    def get_badge(self, obj):
+        try:
+            user = UserProfile.objects.get(user=obj.writer)
+            return user.badge
+        except:
+            return 0
 
     def get_is_writer(self, obj):
         try:
@@ -124,6 +143,7 @@ class CommentDisplaySerializer(serializers.ModelSerializer):
 class PostDisplayDetailSerializer(serializers.ModelSerializer):
     writer = serializers.SlugRelatedField(slug_field="nickname", read_only=True)
     writer_avatar = serializers.SerializerMethodField()
+    badge = serializers.SerializerMethodField()
     hashtag = serializers.SerializerMethodField()
     comment = serializers.SerializerMethodField()
     is_login_user_liked = serializers.SerializerMethodField()
@@ -137,6 +157,7 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             "idx",
             "writer",
             "writer_avatar",
+            "badge",
             "title",
             "image",
             "content",
@@ -155,6 +176,13 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             "hashtag",
             "comment",
         )
+
+    def get_badge(self, obj):
+        try:
+            user = UserProfile.objects.get(user=obj.writer)
+            return user.badge
+        except:
+            return 0
 
     def get_is_login_user_bookmark(self, obj):
         try:

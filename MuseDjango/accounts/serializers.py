@@ -71,10 +71,18 @@ class AvatarSerializer(serializers.ModelSerializer):
 class FollwingSerializer(serializers.ModelSerializer):
     follower = serializers.SlugRelatedField(slug_field="nickname", read_only=True)
     avatar = serializers.SerializerMethodField()
+    badge = serializers.SerializerMethodField()
 
     class Meta:
         model = Follow
-        fields = ("follower", "avatar")
+        fields = ("follower", "avatar", "badge")
+
+    def get_badge(self, obj):
+        try:
+            user = UserProfile.objects.get(user=obj.follower)
+            return user.badge
+        except:
+            return 0
 
     def get_avatar(self, obj):
         try:
@@ -90,10 +98,18 @@ class FollwingSerializer(serializers.ModelSerializer):
 class FollwerSerializer(serializers.ModelSerializer):
     following = serializers.SlugRelatedField(slug_field="nickname", read_only=True)
     avatar = serializers.SerializerMethodField()
+    badge = serializers.SerializerMethodField()
 
     class Meta:
         model = Follow
-        fields = ("following", "avatar")
+        fields = ("following", "avatar", "badge")
+
+    def get_badge(self, obj):
+        try:
+            user = UserProfile.objects.get(user=obj.following)
+            return user.badge
+        except:
+            return 0
 
     def get_avatar(self, obj):
         try:
