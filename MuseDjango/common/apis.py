@@ -19,6 +19,10 @@ def integrated_search(request):
 
             if search:
                 search = [key for key in search.split("+") if key]
+                for s in search:
+                    if s == "gray" or s == "Gray":
+                        search.append("grey")
+                        break
                 result = {}
 
                 # 유저 닉네임 검색
@@ -42,11 +46,15 @@ def integrated_search(request):
                 post_writer_query = reduce(
                     operator.or_, (Q(writer__nickname__icontains=key) for key in search)
                 )
+                post_color_query = reduce(
+                    operator.or_, (Q(dominant_color__icontains=key) for key in search)
+                )
                 post_queryset = Post.objects.filter(
                     Q(hashtag__name__in=search)
                     | post_title_query
                     | post_content_query
                     | post_writer_query
+                    | post_color_query
                 ).distinct()
 
                 if post_queryset:
