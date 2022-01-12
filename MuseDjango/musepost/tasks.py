@@ -6,6 +6,7 @@ from .models import Post, ColorOfWeek
 from colorthief import ColorThief
 import webcolors
 from .color_constants import COLOR_CHECK
+from taggit.models import Tag
 
 logger = logging.getLogger("api")
 
@@ -152,3 +153,17 @@ def select_week_color():
         logger.info(f"INFO: CREATE WEEKLY COLOR > {cow}")
     except:
         logger.error("ERROR: WEEKLY COLOR")
+
+
+@shared_task
+def remove_all_tags_without_objects():
+    """어떤 게시물도 사용 안하는 해시태그 지우기"""
+    try:
+        for tag in Tag.objects.all():
+            if tag.taggit_taggeditem_items.count() == 0:
+                logger.info("Removing: {}".format(tag))
+                tag.delete()
+            else:
+                logger.info("Keeping: {}".format(tag))
+    except:
+        logger.error("ERROR: REMOVE HASHTAG")

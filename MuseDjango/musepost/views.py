@@ -217,12 +217,11 @@ class PostViewSet(viewsets.ModelViewSet):
         # GET host/post/preview_contest
         # 현재 진행 중인 콘테스트 4개 preview
         try:
-            qs = Post.objects.filter(category="contest", cur_status=True).order_by(
-                "-likes", "-created_at"
-            )
+            qs = Post.objects.filter(category="contest", cur_status=True)
             POST_PREVIEW_COUNT = 4
             if qs.count() >= POST_PREVIEW_COUNT:
-                post = qs[:POST_PREVIEW_COUNT]
+                post = random.sample(qs, POST_PREVIEW_COUNT)
+                # post = qs[:POST_PREVIEW_COUNT]
                 serializer = PostDisplayAllSerializer(
                     post, context={"request": request}, many=True
                 )
@@ -241,7 +240,7 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             qs = list(Post.objects.filter(category="reference"))
             POST_PREVIEW_COUNT = 4
-            if len(qs) > POST_PREVIEW_COUNT:
+            if qs.count() > POST_PREVIEW_COUNT:
                 post = random.sample(qs, POST_PREVIEW_COUNT)
                 serializer = PostDisplayAllSerializer(
                     post, context={"request": request}, many=True
@@ -392,6 +391,25 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=200)
         except:
             return Response({"message": "ERROR: POST RECOMMEND > LIST"}, status=400)
+
+    @action(detail=False, methods=["get"])
+    def top_tag(self, request):
+        try:
+            # print(tag.name) # print(tag.num_times)
+            result = []
+            top_tags = Post.hashtag.most_common()[:3]  # 최다 사용된 해시태그 3개 추출
+            print(top_tags)
+            for tag in top_tags:
+                print(tag.name)
+                queryset = Post.objects.filter(hashtag__name=tag.name)
+                print(queryset)
+                # 각 최다 해시태그가 사용된 게시물 중에서 랜덤으로 (이미지, 해시태그) 1쌍 반환
+                random_post = random.choice(queryset)
+                temp_dict = {"image": str(random_post.image), "tag": tag.name}
+                result.append(temp_dict)
+            return Response(result, status=200)
+        except:
+            return Response({"message": "ERROR: POST MOST TAG"}, status=400)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
