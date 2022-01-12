@@ -98,6 +98,7 @@ class UserProfile(models.Model):
     )
     score = models.PositiveIntegerField(default=0, verbose_name="유저 점수")
     badge = models.PositiveIntegerField(default=0, verbose_name="뱃지 단계")
+    muse = models.PositiveIntegerField(default=0, verbose_name="뮤즈 선정 횟수")
 
     def __str__(self):
         return str(self.user)

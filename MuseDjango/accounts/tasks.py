@@ -4,10 +4,10 @@ from .models import *
 import logging
 
 logger = logging.getLogger("api")
-FIRST_BADGE = 100
+FIRST_BADGE = 250
 SECOND_BADGE = 1000
-THIRD_BADGE = 10000
-FOURTH_BADGE = 50000
+THIRD_BADGE = 5000
+FOURTH_BADGE = 10000
 FIFTGH_BADGE = 100000
 
 
