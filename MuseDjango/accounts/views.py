@@ -204,6 +204,20 @@ class UserViewSet(viewsets.ModelViewSet):
         except:
             return Response({"message": "ERROR: USER FOLLOW"}, status=400)
 
+    @action(detail=False, methods=["post"])
+    def forced_cancel_follower(self, request):
+        try:
+            # 요청한 유저가, 팔로잉 당한 유저라면, 해당 관계 삭제
+            follower_nickname = request.data.get("follower", None)
+            follower = User.objects.get(nickname=follower_nickname)
+            follow_relationship = Follow.objects.get(
+                follower=request.user, following=follower
+            )
+            follow_relationship.delete()
+            return Response({"message": "SUCCESS"}, status=200)
+        except:
+            return Response({"message": "ERROR: CANCEL FOLLOW"}, status=400)
+
     @action(detail=True, methods=["get"])
     def my_page(self, request, pk=None):
         # GET host/account/pk/my_page/
