@@ -395,14 +395,10 @@ class PostViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def top_tag(self, request):
         try:
-            # print(tag.name) # print(tag.num_times)
             result = []
             top_tags = Post.hashtag.most_common()[:3]  # 최다 사용된 해시태그 3개 추출
-            print(top_tags)
             for tag in top_tags:
-                print(tag.name)
                 queryset = Post.objects.filter(hashtag__name=tag.name)
-                print(queryset)
                 # 각 최다 해시태그가 사용된 게시물 중에서 랜덤으로 (이미지, 해시태그) 1쌍 반환
                 random_post = random.choice(queryset)
                 temp_dict = {"image": str(random_post.image), "tag": tag.name}
