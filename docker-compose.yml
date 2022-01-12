@@ -5,6 +5,9 @@ services:
     image: redis:latest
     ports:
       - '6379:6379'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
   nginx:
     container_name: nginx
@@ -14,6 +17,8 @@ services:
     volumes: 
       - .:/srv #현재 위치와 /srv(django 어플리케이션이 있는 위치) 
       - ./nginx_django:/etc/nginx/conf.d #nginx 설정파일이 있는 위치
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - muse
 
