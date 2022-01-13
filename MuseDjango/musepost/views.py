@@ -15,6 +15,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import status, viewsets
+from config.settings import MEDIA_URL
 from common.authentication import (
     authorization_validator,
     authorization_validator_or_none,
@@ -28,9 +29,9 @@ import logging
 logger = logging.getLogger("api")
 
 UPLOAD_POST_SCORE = 50
-UPLOAD_COMMENT_SCORE = 1
-LIKE_SCORE = 1
-BOOKMARK_SCORE = 1
+UPLOAD_COMMENT_SCORE = 10
+LIKE_SCORE = 10
+BOOKMARK_SCORE = 5
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -217,9 +218,9 @@ class PostViewSet(viewsets.ModelViewSet):
         # GET host/post/preview_contest
         # 현재 진행 중인 콘테스트 4개 preview
         try:
-            qs = Post.objects.filter(category="contest", cur_status=True)
+            qs = list(Post.objects.filter(category="contest", cur_status=True))
             POST_PREVIEW_COUNT = 4
-            if qs.count() >= POST_PREVIEW_COUNT:
+            if len(qs) >= POST_PREVIEW_COUNT:
                 post = random.sample(qs, POST_PREVIEW_COUNT)
                 # post = qs[:POST_PREVIEW_COUNT]
                 serializer = PostDisplayAllSerializer(
@@ -240,7 +241,7 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             qs = list(Post.objects.filter(category="reference"))
             POST_PREVIEW_COUNT = 4
-            if qs.count() > POST_PREVIEW_COUNT:
+            if len(qs) > POST_PREVIEW_COUNT:
                 post = random.sample(qs, POST_PREVIEW_COUNT)
                 serializer = PostDisplayAllSerializer(
                     post, context={"request": request}, many=True
@@ -401,7 +402,7 @@ class PostViewSet(viewsets.ModelViewSet):
                 queryset = Post.objects.filter(hashtag__name=tag.name)
                 # 각 최다 해시태그가 사용된 게시물 중에서 랜덤으로 (이미지, 해시태그) 1쌍 반환
                 random_post = random.choice(queryset)
-                temp_dict = {"image": str(random_post.image), "tag": tag.name}
+                temp_dict = {"image": MEDIA_URL+str(random_post.image), "tag": tag.name}
                 result.append(temp_dict)
             return Response(result, status=200)
         except:

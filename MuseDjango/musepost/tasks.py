@@ -93,6 +93,7 @@ def select_muse():
     muse_post.is_muse = True
     # 뮤즈 선정 점수
     muse_post.writer.profile.score = MUSE_SCORE
+    muse_post.writer.profile.muse += 1
     muse_post.save()
 
 
