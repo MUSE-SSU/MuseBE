@@ -53,7 +53,7 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({"message": "ERROR: POST CREATE > REQUEST"}, status=400)
         try:
             if hashtag:
-                hashtag = hashtag.strip().split(" ")
+                hashtag = hashtag.strip().replace("#", "").split(",")
 
             if upload_type == "reference":
                 data = {
@@ -402,7 +402,10 @@ class PostViewSet(viewsets.ModelViewSet):
                 queryset = Post.objects.filter(hashtag__name=tag.name)
                 # 각 최다 해시태그가 사용된 게시물 중에서 랜덤으로 (이미지, 해시태그) 1쌍 반환
                 random_post = random.choice(queryset)
-                temp_dict = {"image": MEDIA_URL+str(random_post.image), "tag": tag.name}
+                temp_dict = {
+                    "image": MEDIA_URL + str(random_post.image),
+                    "tag": tag.name,
+                }
                 result.append(temp_dict)
             return Response(result, status=200)
         except:

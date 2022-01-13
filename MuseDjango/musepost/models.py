@@ -28,7 +28,9 @@ class Post(models.Model):
     image = models.ImageField(
         upload_to=upload_post_image, storage=PublicMediaStorage(), verbose_name="작품"
     )
-    content = models.TextField(max_length=1000, verbose_name="내용")
+    content = models.TextField(
+        max_length=1000, null=True, blank=True, verbose_name="내용"
+    )
 
     views = models.PositiveIntegerField(default=0, verbose_name="조회수")
     likes = models.PositiveIntegerField(default=0, verbose_name="좋아요")
