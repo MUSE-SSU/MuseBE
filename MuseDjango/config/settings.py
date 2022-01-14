@@ -14,6 +14,8 @@ else:  # for unintentional case
     DEBUG = False
     DEV = False
 
+MUSE_SLACK_TOKEN = my_settings.MUSE_SLACK_TOKEN
+
 DATABASES = my_settings.DATABASES
 SECRET_KEY = my_settings.SECRET_KEY
 SECRET_ALGORITHM = my_settings.SECRET_ALGORITHM
@@ -24,9 +26,10 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 ALLOWED_HOSTS = [
-    "ec2-52-14-157-45.us-east-2.compute.amazonaws.com",
-    "52.14.157.45",
+    "kyoungnam.xyz",
+    "muse.seoul.kr",
     "muse",
+    "localhost",
 ]
 
 INSTALLED_APPS = [
@@ -79,10 +82,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = (
     "http://127.0.0.1:3000",
     "http://localhost:3000",
-    "http://127.0.0.1:8000",
-    "http://localhost:8000",
-    "http://52.14.157.45",
-    "http://ec2-52-14-157-45.us-east-2.compute.amazonaws.com",
+    "https://muse.seoul.kr",
 )
 
 ROOT_URLCONF = "config.urls"
@@ -193,7 +193,7 @@ AWS_S3_HOST = "s3.ap-northeast-2.amazonaws.com"
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com"
 
 AWS_DEFAULT_ACL = "public-read"
-AWS_S3_SECURE_URLS = False
+# AWS_S3_SECURE_URLS = False
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_OBJECT_PARAMETERS = {
     "CacheControl": "max-age=86400",

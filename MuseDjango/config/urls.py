@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from accounts import views as account_views
 from musepost import views as post_views
 from notice import views as notice_views
-from common import apis as common_apis
+from common import search as search_views
 from .settings import DEV
 
 if DEV:
@@ -29,7 +29,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     path("api/topics/", include("topics.urls")),
-    path("api/search/", common_apis.integrated_search, name="integrated-search"),
+    path("api/search/", search_views.integrated_search, name="integrated-search"),
 ]
 
 # path("accounts/", include("accounts.urls")),

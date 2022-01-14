@@ -15,7 +15,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import status, viewsets
-from config.settings import MEDIA_URL
+from config.settings import MEDIA_URL, MUSE_SLACK_TOKEN, DEV
+from common.slack_api import slack_post_message
 from common.authentication import (
     authorization_validator,
     authorization_validator_or_none,
@@ -92,10 +93,21 @@ class PostViewSet(viewsets.ModelViewSet):
                 # 게시물 등록 점수
                 request.user.profile.score += UPLOAD_POST_SCORE
                 request.user.profile.save()
+                # 슬랙 전송
+                slack_post_message(
+                    MUSE_SLACK_TOKEN,
+                    "#muse-dev" if DEV else "#muse-prod",
+                    f"👍게시물 {uploaded_post.idx} 작성: {request.user.nickname}",
+                )
                 # 이미지 색상 추출
                 get_image_color.delay(uploaded_post.idx)
 
                 return Response({"message": "SUCCESS"}, status=200)
+            slack_post_message(
+                MUSE_SLACK_TOKEN,
+                "#muse-dev-error" if DEV else "#muse-prod-error",
+                f"게시물 작성 ERROR: {request.user.nickname}, {upload_type}, {title}, {content}, {hashtag}, {str(image)}",
+            )
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "ERROR: POST CREATE"}, status=400)
@@ -189,8 +201,18 @@ class PostViewSet(viewsets.ModelViewSet):
                 if ref_url:
                     post.ref_url = ref_url
                 post.save()
+                slack_post_message(
+                    MUSE_SLACK_TOKEN,
+                    "#muse-dev" if DEV else "#muse-prod",
+                    f"👍게시물 {post.idx} 수정: {request.user.nickname}",
+                )
                 return Response({"message": "SUCCESS"}, status=200)
         except:
+            slack_post_message(
+                MUSE_SLACK_TOKEN,
+                "#muse-dev-error" if DEV else "#muse-prod-error",
+                f"게시물 {post.idx} 수정 ERROR: {request.user.nickname}",
+            )
             return Response({"message": "ERROR: POST UPDATE"}, status=400)
 
     def destroy(self, request, pk=None):
@@ -198,8 +220,18 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             if Post.objects.filter(idx=pk, writer=request.user).exists():
                 post = Post.objects.get(idx=pk)
+                slack_post_message(
+                    MUSE_SLACK_TOKEN,
+                    "#muse-dev" if DEV else "#muse-prod",
+                    f"👍게시물 {post.idx} 삭제: {request.user.nickname}",
+                )
                 post.delete()
         except:
+            slack_post_message(
+                MUSE_SLACK_TOKEN,
+                "#muse-dev-error" if DEV else "#muse-prod-error",
+                f"게시물 {post.idx} 삭제 ERROR: {request.user.nickname}",
+            )
             return Response({"message": "ERROR: POST DELETE"}, status=400)
         return Response({"message": "POST DELETE SUCCESS"}, status=200)
 
@@ -302,10 +334,20 @@ class PostViewSet(viewsets.ModelViewSet):
                 post.likes += 1
                 # 좋아요 점수
                 request.user.profile.score += LIKE_SCORE
+                slack_post_message(
+                    MUSE_SLACK_TOKEN,
+                    "#muse-dev" if DEV else "#muse-prod",
+                    f"👍게시물 {post.idx} 좋아요: {request.user.nickname}",
+                )
             request.user.profile.save()
             post.save()
             return Response({"is_like": result}, status=200)
         except:
+            slack_post_message(
+                MUSE_SLACK_TOKEN,
+                "#muse-dev-error" if DEV else "#muse-prod-error",
+                f"게시물 {post.idx} 삭제 ERROR: {request.user.nickname}",
+            )
             return Response({"message": "ERROR: POST LIKE"}, status=400)
 
     @action(detail=True, methods=["post"])
@@ -326,10 +368,21 @@ class PostViewSet(viewsets.ModelViewSet):
                 result = True
                 # 북마크 점수
                 request.user.profile.score += BOOKMARK_SCORE
+                slack_post_message(
+                    MUSE_SLACK_TOKEN,
+                    "#muse-dev" if DEV else "#muse-prod",
+                    f"👍게시물 {post.idx} 북마크: {request.user.nickname}",
+                )
+
             request.user.profile.save()
             bookmark.save()
             return Response({"is_bookmark": result}, status=200)
         except:
+            slack_post_message(
+                MUSE_SLACK_TOKEN,
+                "#muse-dev-error" if DEV else "#muse-prod-error",
+                f"게시물 {post.idx} 북마크 ERROR: {request.user.nickname}",
+            )
             return Response({"message": "ERROR: POST BOOKMARK"}, status=400)
 
     @action(detail=True, methods=["get"])
@@ -435,10 +488,20 @@ class CommentViewSet(viewsets.ModelViewSet):
                 # 댓글 등록 점수
                 request.user.profile.score += UPLOAD_COMMENT_SCORE
                 request.user.profile.save()
+                slack_post_message(
+                    MUSE_SLACK_TOKEN,
+                    "#muse-dev" if DEV else "#muse-prod",
+                    f"👍댓글 post({post_idx}) 작성: {request.user.nickname}, {comment}",
+                )
 
                 return Response({"message": "SUCCESS"}, status=200)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except:
+            slack_post_message(
+                MUSE_SLACK_TOKEN,
+                "#muse-dev-error" if DEV else "#muse-prod-error",
+                f"댓글 post({post_idx}) 작성 ERROR: {request.user.nickname}, {comment}",
+            )
             return Response({"message": "ERROR: COMMENT CREATE"}, status=400)
 
     def destroy(self, request, pk=None):
@@ -446,10 +509,20 @@ class CommentViewSet(viewsets.ModelViewSet):
         try:
             if Comment.objects.filter(idx=pk, writer=request.user).exists():
                 Comment.objects.get(idx=pk).delete()
+                slack_post_message(
+                    MUSE_SLACK_TOKEN,
+                    "#muse-dev" if DEV else "#muse-prod",
+                    f"댓글 삭제: {request.user.nickname}, comment {pk}",
+                )
                 return Response({"message": " SUCCESS"}, status=200)
             else:
                 return Response({"message": "ERROR: COMMENT DELETE > NONE"}, status=400)
         except:
+            slack_post_message(
+                MUSE_SLACK_TOKEN,
+                "#muse-dev-error" if DEV else "#muse-prod-error",
+                f"댓글 삭제 ERROR: {request.user.nickname}, comment {pk}",
+            )
             return Response({"message": "ERROR: COMMENT DELETE"}, status=401)
 
     def partial_update(self, request, pk=None):
@@ -461,8 +534,18 @@ class CommentViewSet(viewsets.ModelViewSet):
                 obj = Comment.objects.get(idx=pk, writer=request.user)
                 obj.comment = comment
                 obj.save()
+                slack_post_message(
+                    MUSE_SLACK_TOKEN,
+                    "#muse-dev" if DEV else "#muse-prod",
+                    f"댓글 수정: {request.user.nickname}, {comment}, {pk}",
+                )
                 return Response({"message": "SUCCESS"}, status=200)
             else:
+                slack_post_message(
+                    MUSE_SLACK_TOKEN,
+                    "#muse-dev-error" if DEV else "#muse-prod-error",
+                    f"댓글 수정 ERROR: {request.user.nickname}, {comment}, {pk}",
+                )
                 return Response({"message": "UNAUTHORIZED"}, status=401)
         except:
             return Response({"message": "REQUEST ERROR"}, status=400)

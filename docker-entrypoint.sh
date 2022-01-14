@@ -14,7 +14,7 @@ else
         # python3 manage.py migrate --fake
 
         echo "-----Collect Static-----"
-        # python3 manage.py collectstatic --noinput
+        python3 manage.py collectstatic --noinput
 
         echo "-----Start Gunicorn-----"
         exec gunicorn config.wsgi:application \
