@@ -8,6 +8,8 @@ from rest_framework import status
 from django.http import JsonResponse
 from django.db.models import Q
 import operator
+from config.settings import MUSE_SLACK_TOKEN, DEV
+from common.slack_api import slack_post_message
 from functools import reduce
 
 # 통합 검색
@@ -65,6 +67,14 @@ def integrated_search(request):
                 else:
                     result["post"] = None
 
+                search_user = None
+                if request.user.nickname:
+                    search_user = request.user.nickname
+                slack_post_message(
+                    MUSE_SLACK_TOKEN,
+                    "#muse-dev" if DEV else "#muse-prod",
+                    f"👍 검색: {search}, 유저: {search_user}",
+                )
                 return JsonResponse(result, safe=False, status=200)
         except:
             return JsonResponse({"message": "ERROR: SEARCH"}, status=400)

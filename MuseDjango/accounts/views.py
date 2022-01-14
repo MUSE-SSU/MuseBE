@@ -25,6 +25,8 @@ from common.authentication import (
 from .serializers import *
 from musepost.serializers import *
 import logging
+from config.settings import MUSE_SLACK_TOKEN, DEV
+from common.slack_api import slack_post_message
 
 logger = logging.getLogger("api")
 
@@ -84,7 +86,11 @@ class UserViewSet(viewsets.ModelViewSet):
                         encoded_token = jwt.encode(
                             {"user_id": user_id}, SECRET_KEY, algorithm=SECRET_ALGORITHM
                         )
-
+                        slack_post_message(
+                            MUSE_SLACK_TOKEN,
+                            "#muse-dev" if DEV else "#muse-prod",
+                            f"👋회원가입: {user_id}, {user_name}",
+                        )
                         return Response(
                             {"result": True, "token": encoded_token}, status=201
                         )
@@ -100,6 +106,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
                     encoded_token = jwt.encode(
                         {"user_id": user_id}, SECRET_KEY, algorithm=SECRET_ALGORITHM
+                    )
+                    slack_post_message(
+                        MUSE_SLACK_TOKEN,
+                        "#muse-dev" if DEV else "#muse-prod",
+                        f"👋로그인: {user_id}, {user_name}",
                     )
                     return Response(
                         {"result": True, "token": encoded_token}, status=200
@@ -143,6 +154,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
                 request.user.save()
                 request.user.profile.save()
+                slack_post_message(
+                    MUSE_SLACK_TOKEN,
+                    "#muse-dev" if DEV else "#muse-prod",
+                    f"👋유저 정보 수정: 닉네임:{nickname}, 자기소개:{self_introduce}, 프사:{str(avatar)}, 인스타:{instar_id}",
+                )
                 return Response({"message": "SUCCESS"}, status=200)
             else:
                 return Response({"message": "ERROR: USER UPDATE > NONE"}, status=400)
@@ -167,6 +183,11 @@ class UserViewSet(viewsets.ModelViewSet):
             ):
                 return Response({"result": False}, status=200)
             else:
+                slack_post_message(
+                    MUSE_SLACK_TOKEN,
+                    "#muse-dev" if DEV else "#muse-prod",
+                    f"👋유저 닉네임 중복 검사: 체크 닉네임:{checking}",
+                )
                 return Response({"result": True}, status=200)
         except:
             return Response({"message": "ERROR: USER CHECK NICKNAME"}, status=400)
@@ -199,6 +220,11 @@ class UserViewSet(viewsets.ModelViewSet):
                     follows.delete()
                     result = False
                 else:
+                    slack_post_message(
+                        MUSE_SLACK_TOKEN,
+                        "#muse-dev" if DEV else "#muse-prod",
+                        f"👋유저 팔로우: 팔로워:{follower_nickname}, 팔로잉:{request.user.nickname}",
+                    )
                     result = True
                 return Response({"message": result}, status=200)
         except:
@@ -214,6 +240,11 @@ class UserViewSet(viewsets.ModelViewSet):
                 follower=request.user, following=follower
             )
             follow_relationship.delete()
+            slack_post_message(
+                MUSE_SLACK_TOKEN,
+                "#muse-dev" if DEV else "#muse-prod",
+                f"👋유저 팔로워 강제 취소: {request.user.nickname} 팔로워:{follower_nickname}",
+            )
             return Response({"message": "SUCCESS"}, status=200)
         except:
             return Response({"message": "ERROR: CANCEL FOLLOW"}, status=400)
