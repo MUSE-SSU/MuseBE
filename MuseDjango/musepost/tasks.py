@@ -7,6 +7,9 @@ from colorthief import ColorThief
 import webcolors
 from .color_constants import COLOR_CHECK
 from taggit.models import Tag
+from config.settings import MUSE_SLACK_TOKEN, DEV
+from common.slack_api import slack_post_message
+
 
 logger = logging.getLogger("api")
 
@@ -84,7 +87,27 @@ def get_image_color(post_idx):
         logger.error("=====ERROR: GET IMAGE COLOR=====")
 
 
+####################################################################
 @shared_task
+def select_weekly_tasks():
+    """매주 일요일 자정 (뮤즈 선정 / 이번 주 색상 선정 / 모든 게시물 진행 상태 변경)"""
+    try:
+        select_muse()
+        select_week_color()
+        change_post_status()
+        slack_post_message(
+            MUSE_SLACK_TOKEN,
+            "#muse-dev" if DEV else "#muse-prod",
+            "!! 🎉이번 주 뮤즈 선정 및 색상 선정 완료 !!",
+        )
+    except:
+        slack_post_message(
+            MUSE_SLACK_TOKEN,
+            "#muse-dev-error" if DEV else "#muse-prod-error",
+            "!! ERROR: 이번 주 뮤즈 선정 및 색상 선정 에러 발생 !!",
+        )
+
+
 def select_muse():
     """매주 일요일 00시: 뮤즈 선정"""
     # 좋아요 가장 많이 받은 게시물, 동점의 경우, 조회수 더 많은 게시물
@@ -97,14 +120,6 @@ def select_muse():
     muse_post.save()
 
 
-@shared_task
-def change_post_status():
-    """매주 일요일 00시 30분: 이번 주의 전체 게시물(레퍼런스, 콘테스트) 현재 진행 상태 변경"""
-    all_cur_post = Post.objects.filter(cur_status=True)
-    all_cur_post.update(cur_status=False)
-
-
-@shared_task
 def select_week_color():
     """매주 일요일 00시: 이번 주 가장 많이 사용된 색상 3가지"""
     try:
@@ -146,7 +161,7 @@ def select_week_color():
             )
 
         # 지난 주 색상표 활성 상태 변경
-        if ColorOfWeek.objects.all().count() >= 2:
+        if ColorOfWeek.objects.all().count() > 1:
             before_color_of_week = ColorOfWeek.objects.get(cur_status=True)
             before_color_of_week.cur_status = False
             before_color_of_week.save()
@@ -154,6 +169,12 @@ def select_week_color():
         logger.info(f"INFO: CREATE WEEKLY COLOR > {cow}")
     except:
         logger.error("ERROR: WEEKLY COLOR")
+
+
+def change_post_status():
+    """매주 일요일 00시 30분: 이번 주의 전체 게시물(레퍼런스, 콘테스트) 현재 진행 상태 변경"""
+    all_cur_post = Post.objects.filter(cur_status=True)
+    all_cur_post.update(cur_status=False)
 
 
 @shared_task
@@ -166,5 +187,10 @@ def remove_all_tags_without_objects():
                 tag.delete()
             else:
                 logger.info("Keeping: {}".format(tag))
+        slack_post_message(
+            MUSE_SLACK_TOKEN,
+            "#muse-dev" if DEV else "#muse-prod",
+            "!! 🛠 사용하지 않는 해시태그 삭제 완료 !!",
+        )
     except:
         logger.error("ERROR: REMOVE HASHTAG")
