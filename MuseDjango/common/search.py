@@ -67,9 +67,11 @@ def integrated_search(request):
                 else:
                     result["post"] = None
 
-                search_user = None
-                if request.user.nickname:
+                
+                try:
                     search_user = request.user.nickname
+                except:
+                    search_user = None
                 slack_post_message(
                     MUSE_SLACK_TOKEN,
                     "#muse-dev" if DEV else "#muse-prod",
