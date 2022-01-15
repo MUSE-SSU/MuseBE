@@ -5,6 +5,7 @@ from accounts import views as account_views
 from musepost import views as post_views
 from notice import views as notice_views
 from common import search as search_views
+from common import health_check
 from .settings import DEV
 
 if DEV:
@@ -26,6 +27,7 @@ router.register(r"notice", notice_views.NoticeViewSet, basename="notice")
 router.register(r"banner", notice_views.BannerViewSet, basename="banner")
 
 urlpatterns = [
+    path("", health_check.index, name="health-check-home"),
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     path("api/topics/", include("topics.urls")),
