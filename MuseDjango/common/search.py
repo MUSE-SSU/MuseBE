@@ -68,14 +68,17 @@ def integrated_search(request):
                     result["post"] = None
 
                 try:
-                    search_user = request.user.nickname
+                    if request.user:
+                        search_user = request.user.nickname
+                    else:
+                        search_user = None
                 except:
                     search_user = None
 
                 slack_post_message(
                     MUSE_SLACK_TOKEN,
                     "#muse-dev" if DEV else "#muse-prod",
-                    f"👍 유저 검색: {search}",
+                    f"👍 유저: {search_user}, 검색: {search}",
                 )
                 return JsonResponse(result, safe=False, status=200)
         except:
