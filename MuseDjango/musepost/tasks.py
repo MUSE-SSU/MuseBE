@@ -114,10 +114,12 @@ def select_muse():
     contest_post = Post.objects.filter(category="contest", cur_status=True)
     muse_post = contest_post.order_by("-likes", "-views").first()
     muse_post.is_muse = True
-    # 뮤즈 선정 점수
-    muse_post.writer.profile.score = MUSE_SCORE
-    muse_post.writer.profile.muse += 1
     muse_post.save()
+    # 뮤즈 선정 점수
+    muse_post.writer.profile.score += MUSE_SCORE
+    muse_post.writer.profile.muse += 1
+    muse_post.writer.profile.badge = 5
+    muse_post.writer.profile.save()
 
 
 def select_week_color():
