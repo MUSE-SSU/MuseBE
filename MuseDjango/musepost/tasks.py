@@ -125,6 +125,12 @@ def select_muse():
 def select_week_color():
     """매주 일요일 00시: 이번 주 가장 많이 사용된 색상 3가지"""
     try:
+        # 지난 주 색상표 활성 상태 변경
+        if ColorOfWeek.objects.all().count() >= 1:
+            before_color_of_week = ColorOfWeek.objects.get(cur_status=True)
+            before_color_of_week.cur_status = False
+            before_color_of_week.save()
+
         week_post = Post.objects.filter(cur_status=True)
         week_dominant_color = (
             week_post.values("dominant_color")
@@ -161,12 +167,6 @@ def select_week_color():
                 color4=additional_color[3],
                 color5=additional_color[4],
             )
-
-        # 지난 주 색상표 활성 상태 변경
-        if ColorOfWeek.objects.all().count() > 1:
-            before_color_of_week = ColorOfWeek.objects.get(cur_status=True)
-            before_color_of_week.cur_status = False
-            before_color_of_week.save()
 
         logger.info(f"INFO: CREATE WEEKLY COLOR > {cow}")
     except:
