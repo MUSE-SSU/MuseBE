@@ -16,7 +16,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ["get_user_id", "get_avatar", "self_introduce", "badge"]
+    list_display = ["get_user_id", "get_avatar", "self_introduce", "score", "badge", "muse"]
 
     def get_user_id(self, obj):
         return obj.user.nickname
