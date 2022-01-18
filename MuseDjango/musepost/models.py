@@ -70,6 +70,8 @@ class Post(models.Model):
     created_at = models.DateTimeField(verbose_name="최초 업로드 날짜", auto_now_add=True)
     modified_at = models.DateTimeField(verbose_name="최근 수정 날짜", auto_now=True)
 
+    usage = models.BooleanField(default=True, verbose_name="노출 여부")
+
     class Meta:
         db_table = "MUSE_Post"
         verbose_name_plural = "게시글"

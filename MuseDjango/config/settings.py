@@ -33,23 +33,6 @@ ALLOWED_HOSTS = [
 ]
 
 INSTALLED_APPS = [
-    # MY APP
-    "accounts",
-    "musepost",
-    "topics",
-    "notice",
-    # Third Party
-    "django_celery_beat",
-    "django_celery_results",
-    "django_crontab",
-    "corsheaders",
-    "storages",
-    "taggit",
-    "taggit_serializer",
-    "rest_framework",
-    "rest_framework.authtoken",
-    # "rest_framework_jwt",
-    # 'rest_auth',
     #
     "django.contrib.sites",
     "allauth",
@@ -64,6 +47,23 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Third Party
+    "django_celery_beat",
+    "django_celery_results",
+    "django_crontab",
+    "corsheaders",
+    "storages",
+    "taggit",
+    "taggit_serializer",
+    "rest_framework",
+    "rest_framework.authtoken",
+    # "rest_framework_jwt",
+    # 'rest_auth',
+    # MY APP
+    "accounts",
+    "musepost",
+    "topics",
+    "notice",
 ]
 
 MIDDLEWARE = [

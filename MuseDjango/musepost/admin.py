@@ -91,6 +91,7 @@ class PostAdmin(admin.ModelAdmin):
         "palette_color3",
         "category",
         "cur_status",
+        "usage",
         "is_muse",
         "created_at",
         "modified_at",
@@ -123,6 +124,19 @@ class PostLikeAdmin(admin.ModelAdmin):
 
     get_post_id.short_description = "게시글"  # Renames column head
     get_like_user_id.short_description = "좋아요 누른 유저"  # Renames column head
+
+
+class PostBookmarkAdmin(admin.ModelAdmin):
+    list_display = ["idx", "get_post_id", "get_user_id"]
+
+    def get_post_id(self, obj):
+        return obj.post.idx
+
+    def get_user_id(self, obj):
+        return obj.user.nickname
+
+    get_post_id.short_description = "게시글"  # Renames column head
+    get_user_id.short_description = "북마크 누른 유저"  # Renames column head
 
 
 class CommentAdmin(admin.ModelAdmin):
@@ -159,5 +173,6 @@ class ColorOfWeekAdmin(admin.ModelAdmin):
 
 admin.site.register(Post, PostAdmin)
 admin.site.register(PostLike, PostLikeAdmin)
+admin.site.register(PostBookmark, PostBookmarkAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(ColorOfWeek, ColorOfWeekAdmin)
