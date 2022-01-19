@@ -98,13 +98,13 @@ def select_weekly_tasks():
         slack_post_message(
             MUSE_SLACK_TOKEN,
             "#muse-dev" if DEV else "#muse-prod",
-            "!! 🎉이번 주 뮤즈 선정 및 색상 선정 완료 !!",
+            "🎉이번 주 뮤즈 선정 및 색상 선정 완료",
         )
     except:
         slack_post_message(
             MUSE_SLACK_TOKEN,
             "#muse-dev-error" if DEV else "#muse-prod-error",
-            "!! ERROR: 이번 주 뮤즈 선정 및 색상 선정 에러 발생 !!",
+            "ERROR: 이번 주 뮤즈 선정 및 색상 선정 에러 발생",
         )
 
 
@@ -192,7 +192,7 @@ def remove_all_tags_without_objects():
         slack_post_message(
             MUSE_SLACK_TOKEN,
             "#muse-dev" if DEV else "#muse-prod",
-            "!! 🛠 사용하지 않는 해시태그 삭제 완료 !!",
+            "🛠 사용하지 않는 해시태그 삭제 완료",
         )
     except:
         logger.error("ERROR: REMOVE HASHTAG")

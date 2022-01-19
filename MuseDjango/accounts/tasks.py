@@ -36,9 +36,14 @@ def calc_user_score_to_badge():
         slack_post_message(
             MUSE_SLACK_TOKEN,
             "#muse-dev" if DEV else "#muse-prod",
-            "!! 🛠 유저 스코어 계산 및 뱃지 지급 완료 !!",
+            "🛠 유저 스코어 계산 및 뱃지 지급 완료",
         )
     except:
+        slack_post_message(
+            MUSE_SLACK_TOKEN,
+            "#muse-dev-error" if DEV else "#muse-prod-error",
+            "ERROR: 유저 스코어 계산 및 뱃지 지급 완료",
+        )
         logging.error("ERROR: CALC USER SCORE")
 
 
