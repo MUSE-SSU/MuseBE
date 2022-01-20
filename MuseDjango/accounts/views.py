@@ -201,6 +201,8 @@ class UserViewSet(viewsets.ModelViewSet):
         except:
             return Response({"message": "ERROR: USER FOLLOW > REQUEST"}, status=400)
         try:
+            if follower_nickname == "":
+                return Response({"message": "ERROR: USER FOLLOW > None"}, status=400)
             if (
                 User.objects.filter(nickname=follower_nickname).exists()
                 and User.objects.filter(user_id=following_id).exists()
