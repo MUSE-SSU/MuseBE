@@ -123,7 +123,7 @@ def select_muse():
 
 
 def select_week_color():
-    """매주 일요일 00시: 이번 주 가장 많이 사용된 색상 3가지"""
+    """매주 일요일 00시: 이번 주 가장 많이 사용된 색상 5가지"""
     try:
         # 지난 주 색상표 활성 상태 변경
         if ColorOfWeek.objects.all().count() >= 1:
@@ -157,8 +157,13 @@ def select_week_color():
                 .order_by("-count")
             )
 
-            for i in range(5 - len(additional_color)):
-                additional_color.append(week_palette_color[i]["palette_color1"])
+            cnt = 5 - len(additional_color)
+            i = 0
+            while cnt > 0:
+                if week_palette_color[i]["palette_color1"] not in additional_color:
+                    additional_color.append(week_palette_color[i]["palette_color1"])
+                    cnt -= 1
+                i += 1
 
             cow = ColorOfWeek.objects.create(
                 color1=additional_color[0],
