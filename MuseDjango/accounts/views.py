@@ -27,6 +27,7 @@ from musepost.serializers import *
 import logging
 from config.settings import MUSE_SLACK_TOKEN, DEV
 from common.slack_api import slack_post_message
+from common.generate_nickname import generate_random_nickname
 
 logger = logging.getLogger("api")
 
@@ -62,6 +63,7 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             if create_type == "register":
                 user_id, user_name = kakao_login(code, KAKAO_REGISTER_REDIRECT_URI)
+                new_nickname = generate_random_nickname()
                 # DB에 존재하면 로그인하라고 반환.
                 if User.objects.filter(user_id=user_id).exists():
                     return Response({"result": False}, status=400)
@@ -71,7 +73,7 @@ class UserViewSet(viewsets.ModelViewSet):
                         data={
                             "user_id": user_id,
                             "username": user_name,
-                            "nickname": user_name,
+                            "nickname": new_nickname,
                         },
                         partial=True,
                     )
@@ -89,7 +91,7 @@ class UserViewSet(viewsets.ModelViewSet):
                         slack_post_message(
                             MUSE_SLACK_TOKEN,
                             "#muse-dev" if DEV else "#muse-prod",
-                            f"👋회원가입: {user_id}, {user_name}",
+                            f"👋회원가입: {user_id}, {new_nickname}",
                         )
                         return Response(
                             {"result": True, "token": encoded_token}, status=201
@@ -110,10 +112,17 @@ class UserViewSet(viewsets.ModelViewSet):
                     slack_post_message(
                         MUSE_SLACK_TOKEN,
                         "#muse-dev" if DEV else "#muse-prod",
-                        f"👋로그인: {user_id}, {user_name}",
+                        f"👋로그인: {user.nickname}",
                     )
+                    is_first = False
+                    if user.is_first:
+                        user.is_first = False
+                        user.save()
+                        is_first = True
+
                     return Response(
-                        {"result": True, "token": encoded_token}, status=200
+                        {"result": True, "is_first": is_first, "token": encoded_token},
+                        status=200,
                     )
                 # DB에 없으면, 회원가입부터 하라고 반환
                 else:
@@ -201,6 +210,8 @@ class UserViewSet(viewsets.ModelViewSet):
         except:
             return Response({"message": "ERROR: USER FOLLOW > REQUEST"}, status=400)
         try:
+            if follower_nickname == "":
+                return Response({"message": "ERROR: USER FOLLOW > None"}, status=400)
             if (
                 User.objects.filter(nickname=follower_nickname).exists()
                 and User.objects.filter(user_id=following_id).exists()

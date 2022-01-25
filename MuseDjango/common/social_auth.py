@@ -39,5 +39,6 @@ def kakao_login(code, log_method):
 
     user_id = user_info["id"]
     user_name = user_info["properties"]["nickname"]
+    # user_email = user_info["properties"]["email"] 아마도
 
     return user_id, user_name

@@ -5,10 +5,10 @@ from .models import *
 class NoticeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notice
-        fields = "__all__"
+        fields = ("title", "content")
 
 
 class BannerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Banner
-        fields = "__all__"
+        fields = ("title", "content")
