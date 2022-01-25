@@ -27,7 +27,7 @@ class Notice(models.Model):
     )
     title = models.TextField(max_length=500, blank=True, null=True, verbose_name="제목")
     content = models.TextField(
-        max_length=1000, blank=True, null=True, verbose_name="내용"
+        max_length=3000, blank=True, null=True, verbose_name="내용"
     )
     usage = models.BooleanField(default=True, verbose_name="노출 여부")
     created_at = models.DateTimeField(verbose_name="최초 업로드 날짜", auto_now_add=True)

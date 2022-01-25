@@ -44,9 +44,11 @@ class User(AbstractBaseUser):
         max_length=128, verbose_name="비밀번호", null=True, blank=True
     )
     username = models.CharField(max_length=100, verbose_name="이름")
+    # email = models.EmailField(max_length=256, verbose_name="이메일", unique=True)
     nickname = models.CharField(max_length=50, verbose_name="닉네임", unique=True)
-    # slug = models.SlugField(unique=True, blank=True, null=True, allow_unicode=True,)
+    # slug = models.SlugField(unique=True, blank=True, null=True, allow_unicode=True)
 
+    tos_agree = models.BooleanField(default=True, verbose_name="약관 동의 여부")
     date_joined = models.DateTimeField(verbose_name="최초 가입 날짜", auto_now_add=True)
     last_login = models.DateTimeField(verbose_name="최근 로그인 날짜", auto_now=True)
 

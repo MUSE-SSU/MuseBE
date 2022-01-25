@@ -29,7 +29,9 @@ class NoticeViewSet(viewsets.ModelViewSet):
 
         try:
             notice_type = notice_type.split(",")
-            queryset = Notice.objects.filter(usage=True, category__in=notice_type)
+            queryset = Notice.objects.filter(
+                usage=True, category__in=notice_type
+            ).order_by("-idx")
             serializer = NoticeSerializer(queryset, many=True)
             return Response(serializer.data, status=200)
         except:
