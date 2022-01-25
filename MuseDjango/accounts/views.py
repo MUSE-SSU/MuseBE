@@ -62,7 +62,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({"message": "ERROR: USER CREATE > REQUEST"}, status=400)
         try:
             if create_type == "register":
-                user_id, user_name = kakao_login(code, KAKAO_REGISTER_REDIRECT_URI)
+                user_id, user_email = kakao_login(code, KAKAO_REGISTER_REDIRECT_URI)
                 new_nickname = generate_random_nickname()
                 # DB에 존재하면 로그인하라고 반환.
                 if User.objects.filter(user_id=user_id).exists():
@@ -72,7 +72,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     serializer = UserSerializer(
                         data={
                             "user_id": user_id,
-                            "username": user_name,
+                            "email": user_email,
                             "nickname": new_nickname,
                         },
                         partial=True,
@@ -98,7 +98,7 @@ class UserViewSet(viewsets.ModelViewSet):
                         )
                     return Response(serializer.errors, status=400)
             elif create_type == "login":
-                user_id, user_name = kakao_login(code, KAKAO_LOGIN_REDIRECT_URI)
+                user_id, user_email = kakao_login(code, KAKAO_LOGIN_REDIRECT_URI)
 
                 # DB에 있는 유저면, 로그인 성공
                 if User.objects.filter(user_id=user_id).exists():

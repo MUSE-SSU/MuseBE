@@ -6,7 +6,7 @@ class UserAdmin(admin.ModelAdmin):
     list_display = [
         "idx",
         "user_id",
-        "username",
+        # "username",
         "nickname",
         "date_joined",
         "last_login",

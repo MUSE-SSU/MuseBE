@@ -44,8 +44,10 @@ class User(AbstractBaseUser):
     password = models.CharField(
         max_length=128, verbose_name="비밀번호", null=True, blank=True
     )
-    username = models.CharField(max_length=100, verbose_name="이름")
-    # email = models.EmailField(max_length=256, verbose_name="이메일", unique=True)
+    # username = models.CharField(max_length=100, verbose_name="이름")
+    email = models.EmailField(
+        max_length=150, verbose_name="이메일", null=True, blank=True, unique=True
+    )
     nickname = models.CharField(max_length=50, verbose_name="닉네임", unique=True)
     # slug = models.SlugField(unique=True, blank=True, null=True, allow_unicode=True)
 
