@@ -1,3 +1,4 @@
+from tabnanny import verbose
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.text import slugify
@@ -49,6 +50,8 @@ class User(AbstractBaseUser):
     # slug = models.SlugField(unique=True, blank=True, null=True, allow_unicode=True)
 
     tos_agree = models.BooleanField(default=True, verbose_name="약관 동의 여부")
+    is_first = models.BooleanField(default=True, verbose_name="첫 로그인 팝업")
+
     date_joined = models.DateTimeField(verbose_name="최초 가입 날짜", auto_now_add=True)
     last_login = models.DateTimeField(verbose_name="최근 로그인 날짜", auto_now=True)
 

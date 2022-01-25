@@ -114,8 +114,15 @@ class UserViewSet(viewsets.ModelViewSet):
                         "#muse-dev" if DEV else "#muse-prod",
                         f"👋로그인: {user.nickname}",
                     )
+                    is_first = False
+                    if user.is_first:
+                        user.is_first = False
+                        user.save()
+                        is_first = True
+
                     return Response(
-                        {"result": True, "token": encoded_token}, status=200
+                        {"result": True, "is_first": is_first, "token": encoded_token},
+                        status=200,
                     )
                 # DB에 없으면, 회원가입부터 하라고 반환
                 else:

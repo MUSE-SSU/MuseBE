@@ -4,8 +4,9 @@ from django.db import models
 
 NOTICE_CATEGORY = (
     ("tos", "이용 약관"),
+    ("privacy", "개인정보 처리방침"),
+    ("policy", "MUSE 정책"),
     ("guide", "이용 안내"),
-    ("footer", "사이트 하단 설명"),
     ("popup", "일회성 팝업"),
 )
 BANNER_CATEGORY = (
