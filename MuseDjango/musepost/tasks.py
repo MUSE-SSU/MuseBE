@@ -9,7 +9,7 @@ from .color_constants import COLOR_CHECK
 from taggit.models import Tag
 from config.settings import MUSE_SLACK_TOKEN, DEV
 from common.slack_api import slack_post_message
-
+from topics.models import Topic
 
 logger = logging.getLogger("api")
 
@@ -120,6 +120,12 @@ def select_muse():
     muse_post.writer.profile.muse += 1
     muse_post.writer.profile.badge = 5
     muse_post.writer.profile.save()
+    # 콘테스트 주제 week 변경
+    past_topic = Topic.objects.filter(activate_week=True)
+    past_topic.activate_week = False
+    past_topic.save()
+    current_week = past_topic.week + 1
+    current = Topic.objects.create(week=current_week)
 
 
 def select_week_color():
