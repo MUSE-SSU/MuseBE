@@ -27,7 +27,6 @@ class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "username",
             "nickname",
             "avatar",
             "self_introduce",

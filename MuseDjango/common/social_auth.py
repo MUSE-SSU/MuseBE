@@ -38,7 +38,7 @@ def kakao_login(code, log_method):
         return Response({"message": "INVALID TOKEN"}, status=400)
 
     user_id = user_info["id"]
-    user_name = user_info["properties"]["nickname"]
-    # user_email = user_info["properties"]["email"] 아마도
+    user_email = user_info["kakao_account"]["email"]
+    # user_name = user_info["properties"]["nickname"]
 
-    return user_id, user_name
+    return user_id, user_email
