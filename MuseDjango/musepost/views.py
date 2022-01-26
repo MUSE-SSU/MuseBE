@@ -62,7 +62,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     "title": title,
                     "content": content,
                     "image": image,
-                    "hashtag": hashtag,
+                    "hashtag": hashtag if hashtag else "",
                     "category": upload_type,
                     "ref_url": ref_url,
                 }
@@ -81,7 +81,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     "title": title,
                     "content": content,
                     "image": image,
-                    "hashtag": hashtag,
+                    "hashtag": hashtag if hashtag else "",
                     "week": week,
                     "topic": topic,
                     "category": upload_type,
