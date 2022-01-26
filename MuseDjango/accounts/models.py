@@ -49,8 +49,8 @@ class User(AbstractBaseUser):
         max_length=150, verbose_name="이메일", null=True, blank=True, unique=True
     )
     nickname = models.CharField(max_length=50, verbose_name="닉네임", unique=True)
-    # slug = models.SlugField(unique=True, blank=True, null=True, allow_unicode=True)
 
+    # slug = models.SlugField(unique=True, blank=True, null=True, allow_unicode=True)
     tos_agree = models.BooleanField(default=True, verbose_name="약관 동의 여부")
     is_first = models.BooleanField(default=True, verbose_name="첫 로그인 팝업")
 

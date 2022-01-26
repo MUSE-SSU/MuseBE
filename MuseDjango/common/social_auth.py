@@ -1,7 +1,12 @@
 from django.http import JsonResponse
 import json
 import requests
-from my_settings import KAKAO_REST_KEY, SECRET_KEY, SECRET_ALGORITHM
+from my_settings import (
+    KAKAO_REST_KEY,
+    SECRET_KEY,
+    SECRET_ALGORITHM,
+    KAKAO_LOGOUT_REDIRECT_URI,
+)
 from rest_framework.response import Response
 
 
@@ -42,3 +47,14 @@ def kakao_login(code, log_method):
     # user_name = user_info["properties"]["nickname"]
 
     return user_id, user_email
+
+
+# def kakao_logout():
+#     response = requests.get(
+#         "https://kauth.kakao.com/oauth/logout",
+#         params={
+#             "client_id": KAKAO_REST_KEY,
+#             "logout_redirect_uri": KAKAO_LOGOUT_REDIRECT_URI,
+#         },
+#     )
+#     return response
