@@ -174,10 +174,26 @@ class UserViewSet(viewsets.ModelViewSet):
         except:
             return Response({"message": "ERROR: USER UPDATE"}, status=400)
 
+    # @action(detail=False, methods=["post"])
+    # def logout(self, request):
+    #     """로그아웃"""
+    #     try:
+    #         res = kakao_logout()
+    #         slack_post_message(
+    #             MUSE_SLACK_TOKEN,
+    #             "#muse-dev" if DEV else "#muse-prod",
+    #             f"👋유저 로그아웃!",
+    #         )
+    #         return Response({"message": "SUCCESS"}, status=200)
+    #     except Exception as e:
+    #         print(e)
+    #         return Response({"message": "ERROR: USER LOGOUT"}, status=400)
+
     def retrieve(self, request, pk=None):
         pass
 
     def destroy(self, request, pk=None):
+        """회원탈퇴"""
         pass
 
     @action(detail=False, methods=["post"])
