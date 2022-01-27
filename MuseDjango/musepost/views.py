@@ -451,15 +451,18 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             result = []
             top_tags = Post.hashtag.most_common()[:3]  # 최다 사용된 해시태그 3개 추출
+
             for tag in top_tags:
                 queryset = Post.objects.filter(hashtag__name=tag.name)
-                # 각 최다 해시태그가 사용된 게시물 중에서 랜덤으로 (이미지, 해시태그) 1쌍 반환
-                random_post = random.choice(queryset)
-                temp_dict = {
-                    "image": MEDIA_URL + str(random_post.image),
-                    "tag": tag.name,
-                }
-                result.append(temp_dict)
+                if len(queryset):
+                    # 각 최다 해시태그가 사용된 게시물 중에서 랜덤으로 (이미지, 해시태그) 1쌍 반환
+                    random_post = random.choice(queryset)
+                    temp_dict = {
+                        "image": MEDIA_URL + str(random_post.image),
+                        "tag": tag.name,
+                    }
+                    result.append(temp_dict)
+
             return Response(result, status=200)
         except:
             return Response({"message": "ERROR: POST MOST TAG"}, status=400)

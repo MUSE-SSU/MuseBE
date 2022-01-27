@@ -136,9 +136,9 @@ class UserViewSet(viewsets.ModelViewSet):
             if not request.user:
                 return Response({"message": "ERROR: USER RETRIEVE > NONE"}, status=400)
             serializer = UserInfoSerializer(request.user)
+            return Response(serializer.data, status=200)
         except:
             return Response({"message": "ERROR: USER RETRIEVE"}, status=400)
-        return Response(serializer.data, status=200)
 
     def partial_update(self, request, pk=None):
         # PATCH host/account/pk(nickname)/

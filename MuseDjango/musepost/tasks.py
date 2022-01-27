@@ -1,5 +1,5 @@
 from celery import shared_task
-from django.db.models import Count
+from django.db.models import Count, F
 import logging
 from .models import Post, ColorOfWeek
 
@@ -157,27 +157,49 @@ def select_week_color():
             for i, color in enumerate(week_dominant_color):
                 additional_color.append(color["dominant_color"])
 
-            week_palette_color = (
-                week_post.values("palette_color1")
-                .annotate(count=Count("palette_color1"))
-                .order_by("-count")
-            )
+                week_palette_color1 = (
+                    week_post.annotate(
+                        palette_color=F("palette_color1"), count=Count("palette_color1")
+                    )
+                    .values("palette_color", "count")
+                    .order_by("-count")
+                )[:3]
+                week_palette_color2 = (
+                    week_post.annotate(
+                        palette_color=F("palette_color2"), count=Count("palette_color2")
+                    )
+                    .values("palette_color", "count")
+                    .order_by("-count")
+                )[:3]
+                week_palette_color3 = (
+                    week_post.annotate(
+                        palette_color=F("palette_color3"), count=Count("palette_color3")
+                    )
+                    .values("palette_color", "count")
+                    .order_by("-count")
+                )[:3]
 
-            cnt = 5 - len(additional_color)
-            i = 0
-            while cnt > 0:
-                if week_palette_color[i]["palette_color1"] not in additional_color:
-                    additional_color.append(week_palette_color[i]["palette_color1"])
-                    cnt -= 1
-                i += 1
+                week_palette_color = (
+                    list(week_palette_color1)
+                    + list(week_palette_color2)
+                    + list(week_palette_color3)
+                )
 
-            cow = ColorOfWeek.objects.create(
-                color1=additional_color[0],
-                color2=additional_color[1],
-                color3=additional_color[2],
-                color4=additional_color[3],
-                color5=additional_color[4],
-            )
+                cnt = 5 - len(additional_color)
+                i = 0
+                while cnt > 0:
+                    if week_palette_color[i]["palette_color"] not in additional_color:
+                        additional_color.append(week_palette_color[i]["palette_color"])
+                        cnt -= 1
+                    i += 1
+
+                cow = ColorOfWeek.objects.create(
+                    color1=additional_color[0],
+                    color2=additional_color[1],
+                    color3=additional_color[2],
+                    color4=additional_color[3],
+                    color5=additional_color[4],
+                )
 
         logger.info(f"INFO: CREATE WEEKLY COLOR > {cow}")
     except:
