@@ -100,7 +100,7 @@ class UserProfile(models.Model):
     self_introduce = models.CharField(
         max_length=300, blank=True, null=True, verbose_name="자기 소개"
     )
-    instar_id = models.CharField(
+    insta_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name="인스타ID"
     )
     score = models.PositiveIntegerField(default=0, verbose_name="유저 점수")
