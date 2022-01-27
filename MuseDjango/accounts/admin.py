@@ -22,6 +22,7 @@ class UserProfileAdmin(admin.ModelAdmin):
         "get_user_id",
         "get_avatar",
         "self_introduce",
+        "insta_id",
         "score",
         "badge",
         "muse",
@@ -35,7 +36,6 @@ class UserProfileAdmin(admin.ModelAdmin):
 
     get_user_id.short_description = "닉네임"  # Renames column head
     get_avatar.short_description = "프로필 사진"  # Renames column head
-    # get_user_id.admin_order_field  = 'author'  #Allows column order sorting
 
 
 class FollowAdmin(admin.ModelAdmin):

@@ -21,7 +21,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
     badge = serializers.SerializerMethodField()
     self_introduce = serializers.SerializerMethodField()
-    instar_id = serializers.SerializerMethodField()
+    insta_id = serializers.SerializerMethodField()
     score = serializers.SerializerMethodField()
 
     class Meta:
@@ -30,7 +30,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
             "nickname",
             "avatar",
             "self_introduce",
-            "instar_id",
+            "insta_id",
             "badge",
             "score",
         )
@@ -38,8 +38,8 @@ class UserInfoSerializer(serializers.ModelSerializer):
     def get_score(self, obj):
         return obj.profile.score
 
-    def get_instar_id(self, obj):
-        return obj.profile.instar_id
+    def get_insta_id(self, obj):
+        return obj.profile.insta_id
 
     def get_avatar(self, obj):
         if not obj.profile.avatar:

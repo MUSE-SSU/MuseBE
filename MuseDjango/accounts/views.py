@@ -146,7 +146,7 @@ class UserViewSet(viewsets.ModelViewSet):
             nickname = request.data.get("nickname", None)
             self_introduce = request.data.get("self_introduce", None)
             avatar = request.data.get("avatar", None)
-            instar_id = request.data.get("instar_id", None)
+            insta_id = request.data.get("insta_id", None)
         except:
             return Response({"message": "ERROR: USER UPDATE > REQUEST"}, status=400)
 
@@ -154,19 +154,23 @@ class UserViewSet(viewsets.ModelViewSet):
             if User.objects.filter(user_id=request.user, nickname=pk).exists():
                 if nickname:
                     request.user.nickname = nickname
-                if self_introduce:
-                    request.user.profile.self_introduce = self_introduce
                 if avatar:
                     request.user.profile.avatar = avatar
-                if instar_id:
-                    request.user.profile.instar_id = instar_id
+                if self_introduce:
+                    request.user.profile.self_introduce = self_introduce
+                else:
+                    request.user.profile.self_introduce = None
+                if insta_id:
+                    request.user.profile.insta_id = insta_id
+                else:
+                    request.user.profile.insta_id = None
 
                 request.user.save()
                 request.user.profile.save()
                 slack_post_message(
                     MUSE_SLACK_TOKEN,
                     "#muse-dev" if DEV else "#muse-prod",
-                    f"👋유저 정보 수정: 닉네임:{nickname}, 자기소개:{self_introduce}, 프사:{str(avatar)}, 인스타:{instar_id}",
+                    f"👋유저 정보 수정: 닉네임:{nickname}, 자기소개:{self_introduce}, 프사:{str(avatar)}, 인스타:{insta_id}",
                 )
                 return Response({"message": "SUCCESS"}, status=200)
             else:
