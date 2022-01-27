@@ -4,6 +4,7 @@ from .models import *
 from config.settings import MUSE_SLACK_TOKEN, DEV
 from common.slack_api import slack_post_message
 import logging
+from datetime import datetime, timedelta
 
 logger = logging.getLogger("api")
 
@@ -47,10 +48,21 @@ def calc_user_score_to_badge():
         logging.error("ERROR: CALC USER SCORE")
 
 
-# @shared_task
-# def calc_ranking():
-#     try:
-#         queryset = UserProfile.objects.filter(user__is_superuser=False).order_by("-score")
-
-#     except:
-#         logging.error("ERROR: CALC RANKING")
+@shared_task
+def user_list_to_csv():
+    try:
+        now = datetime.now()
+        before_one_week = now - timedelta(weeks=1)
+        new_user_list = []
+        queryset = User.objects.filter(
+            date_joined__lte=now, date_joined__gte=before_one_week
+        )
+        for q in queryset:
+            new_user_list.append((q.nickname, q.profile.insta_id))
+        slack_post_message(
+            MUSE_SLACK_TOKEN,
+            "#muse-dev" if DEV else "#muse-prod",
+            f"🎉 새로운 유저 리스트!! {new_user_list}",
+        )
+    except:
+        logging.error("ERROR: USER LIST TO CSV")

@@ -17,7 +17,7 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
-    # 매주 일요일 자정 - 뮤즈 선정/이번 주 색상 선정/게시물 상태 변경/
+    # 매주 일요일 자정 - 뮤즈 선정/이번 주 색상 선정/게시물 상태 변경
     "select_weekly_tasks": {
         "task": "musepost.tasks.select_weekly_tasks",
         "schedule": crontab(minute=0, hour=0, day_of_week="sunday"),
@@ -31,6 +31,11 @@ app.conf.beat_schedule = {
     "calc_user_score": {
         "task": "accounts.tasks.calc_user_score_to_badge",
         "schedule": crontab(minute=0, hour="*/1"),
+    },
+    # 매주 일요일 자정 - 새로 가입한 유저 리스트 슬랙 전달
+    "slack_to_new_user_list": {
+        "task": "accounts.tasks.get_new_user_list",
+        "schedule": crontab(minute=0, hour=0, day_of_week="sunday"),
     },
 }
 
