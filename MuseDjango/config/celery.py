@@ -37,6 +37,10 @@ app.conf.beat_schedule = {
         "task": "accounts.tasks.get_new_user_list",
         "schedule": crontab(minute=0, hour=0, day_of_week="sunday"),
     },
+    # "testests": {
+    #     "task": "musepost.tasks.select_week_color",
+    #     "schedule": 10.0,
+    # },
 }
 
 
