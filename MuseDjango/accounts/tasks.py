@@ -49,7 +49,7 @@ def calc_user_score_to_badge():
 
 
 @shared_task
-def user_list_to_csv():
+def get_new_user_list():
     try:
         now = datetime.now()
         before_one_week = now - timedelta(weeks=1)
