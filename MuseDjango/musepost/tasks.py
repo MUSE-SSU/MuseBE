@@ -128,7 +128,6 @@ def select_muse():
     current = Topic.objects.create(week=current_week)
 
 
-@shared_task
 def select_week_color():
     """매주 일요일 00시: 이번 주 가장 많이 사용된 색상 5가지"""
     try:

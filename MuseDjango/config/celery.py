@@ -22,11 +22,11 @@ app.conf.beat_schedule = {
         "task": "musepost.tasks.select_weekly_tasks",
         "schedule": crontab(minute=0, hour=0, day_of_week="sunday"),
     },
-    # 매일 자정 - 사용하는 게시물이 없는 해시태그 삭제
-    "delete_hashtag_not_use": {
-        "task": "musepost.tasks.remove_all_tags_without_objects",
-        "schedule": crontab(minute=0, hour=0),
-    },
+    # # 매일 자정 - 사용하는 게시물이 없는 해시태그 삭제
+    # "delete_hashtag_not_use": {
+    #     "task": "musepost.tasks.remove_all_tags_without_objects",
+    #     "schedule": crontab(minute=0, hour=0),
+    # },
     # 매일 1시간 마다 - 유저 Score 계산 후 뱃지 지급
     "calc_user_score": {
         "task": "accounts.tasks.calc_user_score_to_badge",

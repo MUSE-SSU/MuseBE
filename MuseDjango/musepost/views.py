@@ -24,7 +24,7 @@ from common.authentication import (
 )
 from .serializers import *
 import random
-from .tasks import get_image_color
+from .tasks import get_image_color, remove_all_tags_without_objects
 import logging
 
 logger = logging.getLogger("api")
@@ -62,7 +62,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     "title": title,
                     "content": content,
                     "image": image,
-                    "hashtag": hashtag if hashtag else "",
+                    "hashtag": hashtag,
                     "category": upload_type,
                     "ref_url": ref_url,
                 }
@@ -81,7 +81,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     "title": title,
                     "content": content,
                     "image": image,
-                    "hashtag": hashtag if hashtag else "",
+                    "hashtag": hashtag,
                     "week": week,
                     "topic": topic,
                     "category": upload_type,
@@ -103,13 +103,12 @@ class PostViewSet(viewsets.ModelViewSet):
                 get_image_color.delay(uploaded_post.idx)
 
                 return Response({"message": "SUCCESS"}, status=200)
+        except:
             slack_post_message(
                 MUSE_SLACK_TOKEN,
                 "#muse-dev-error" if DEV else "#muse-prod-error",
-                f"게시물 작성 ERROR: {request.user.nickname}, {upload_type}, {title}, {content}, {hashtag}, {str(image)}",
+                f"게시물 작성 ERROR: {request.user.nickname}",
             )
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except:
             return Response({"message": "ERROR: POST CREATE"}, status=400)
 
     def list(self, request):
@@ -220,6 +219,7 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             if Post.objects.filter(idx=pk, writer=request.user).exists():
                 post = Post.objects.get(idx=pk)
+                remove_all_tags_without_objects.delay()
                 slack_post_message(
                     MUSE_SLACK_TOKEN,
                     "#muse-dev" if DEV else "#muse-prod",
@@ -451,9 +451,11 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             result = []
             top_tags = Post.hashtag.most_common()[:3]  # 최다 사용된 해시태그 3개 추출
-
+            print(top_tags)
             for tag in top_tags:
+
                 queryset = Post.objects.filter(hashtag__name=tag.name)
+                print(queryset)
                 if len(queryset):
                     # 각 최다 해시태그가 사용된 게시물 중에서 랜덤으로 (이미지, 해시태그) 1쌍 반환
                     random_post = random.choice(queryset)
@@ -462,6 +464,7 @@ class PostViewSet(viewsets.ModelViewSet):
                         "tag": tag.name,
                     }
                     result.append(temp_dict)
+                    print(result)
 
             return Response(result, status=200)
         except:
