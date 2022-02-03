@@ -1,4 +1,5 @@
 from celery import shared_task
+import celery
 from django.db.models import Count, F
 import logging
 from .models import Post, ColorOfWeek
@@ -10,6 +11,10 @@ from taggit.models import Tag
 from config.settings import MUSE_SLACK_TOKEN, DEV
 from common.slack_api import slack_post_message
 from topics.models import Topic
+
+# from celery import Celery
+
+# app = Celery("config")
 
 logger = logging.getLogger("api")
 
@@ -37,54 +42,69 @@ def get_colour_name(requested_colour):
 
 
 @shared_task
-def get_image_color(post_idx):
+def get_image_color():
     """이미지 색상 추출"""
     try:
-        post = Post.objects.get(idx=post_idx)
+        # post = Post.objects.get(idx=post_idx)
+        qs = Post.objects.filter(dominant_color=None)
+
+        if qs:
+            for post in qs:
+                color_thief = ColorThief(post.image)
+
+                # get domminat color
+                dominant_color = color_thief.get_color(quality=1)
+                dominant_actual_name, dominant_closest_name = get_colour_name(
+                    dominant_color
+                )
+
+                # get palette color
+                palette = color_thief.get_palette(color_count=3)
+                plt_name = []
+                for plt in palette:
+                    plt_actual_name, plt_closest_name = get_colour_name(plt)
+                    if plt_actual_name:
+                        plt_name.append(plt_actual_name)
+                    else:
+                        plt_name.append(plt_closest_name)
+
+                # Replace Color Name with Spacing & Upper Case
+                temp_colors = []
+                if dominant_actual_name:
+                    temp_colors.append(dominant_actual_name)
+                else:
+                    temp_colors.append(dominant_closest_name)
+                temp_colors.extend(plt_name)
+
+                replace_colors = []
+                for idx, full_color in enumerate(temp_colors):
+                    replace_color_name = full_color
+                    for key, value in COLOR_CHECK.items():
+                        if key in replace_color_name:
+                            replace_color_name = replace_color_name.replace(
+                                key, value + " "
+                            )
+                    replace_colors.append(replace_color_name.rstrip())
+
+                # save color
+                post.dominant_color = replace_colors[0]
+                post.palette_color1 = replace_colors[1]
+                post.palette_color2 = replace_colors[2]
+                post.palette_color3 = replace_colors[3]
+
+                post.save()
+
+        slack_post_message(
+            MUSE_SLACK_TOKEN,
+            "#muse-dev" if DEV else "#muse-prod",
+            f"🛠 이미지 색상 추출 완료",
+        )
     except:
-        logger.error("ERROR: GET IMAGE COLOR > NONE OBJ")
-    try:
-        color_thief = ColorThief(post.image)
-
-        # get domminat color
-        dominant_color = color_thief.get_color(quality=1)
-        dominant_actual_name, dominant_closest_name = get_colour_name(dominant_color)
-
-        # get palette color
-        palette = color_thief.get_palette(color_count=3)
-        plt_name = []
-        for plt in palette:
-            plt_actual_name, plt_closest_name = get_colour_name(plt)
-            if plt_actual_name:
-                plt_name.append(plt_actual_name)
-            else:
-                plt_name.append(plt_closest_name)
-
-        # Replace Color Name with Spacing & Upper Case
-        temp_colors = []
-        if dominant_actual_name:
-            temp_colors.append(dominant_actual_name)
-        else:
-            temp_colors.append(dominant_closest_name)
-        temp_colors.extend(plt_name)
-
-        replace_colors = []
-        for idx, full_color in enumerate(temp_colors):
-            replace_color_name = full_color
-            for key, value in COLOR_CHECK.items():
-                if key in replace_color_name:
-                    replace_color_name = replace_color_name.replace(key, value + " ")
-            replace_colors.append(replace_color_name.rstrip())
-
-        # save color
-        post.dominant_color = replace_colors[0]
-        post.palette_color1 = replace_colors[1]
-        post.palette_color2 = replace_colors[2]
-        post.palette_color3 = replace_colors[3]
-
-        post.save()
-    except:
-        logger.error("=====ERROR: GET IMAGE COLOR=====")
+        slack_post_message(
+            MUSE_SLACK_TOKEN,
+            "#muse-dev-error" if DEV else "#muse-prod-error",
+            "ERROR: 이미지 색상 추출",
+        )
 
 
 ####################################################################

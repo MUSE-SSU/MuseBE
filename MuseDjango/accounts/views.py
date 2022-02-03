@@ -93,8 +93,10 @@ class UserViewSet(viewsets.ModelViewSet):
                             "#muse-dev" if DEV else "#muse-prod",
                             f"👋회원가입: {user_id}, {new_nickname}",
                         )
+
                         return Response(
-                            {"result": True, "token": encoded_token}, status=201
+                            {"result": True, "is_first": True, "token": encoded_token},
+                            status=201,
                         )
                     return Response(serializer.errors, status=400)
             elif create_type == "login":

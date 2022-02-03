@@ -25,12 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
-ALLOWED_HOSTS = [
-    "kyoungnam.xyz",
-    "muse.seoul.kr",
-    "muse",
-    "localhost",
-]
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     #
@@ -82,6 +77,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = (
     "http://127.0.0.1:3000",
     "http://localhost:3000",
+    "http://muse.seoul.kr",
     "https://muse.seoul.kr",
 )
 
@@ -124,12 +120,14 @@ AUTH_PASSWORD_VALIDATORS = [
 # Celery Settings
 CELERY_ALWAYS_EAGER = False
 CELERY_BROKER_URL = "redis://redis:6379"
-CELERY_RESULT_BACKEND = "redis://redis:6379"
+# CELERY_RESULT_BACKEND = "redis://redis:6379"
 CELERY_ACCEPT_CONTENT = ["application/json", "json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Asia/Seoul"
 CELERY_ENABLE_UTC = False
+# CELERY_RESULT_BACKEND_MAX_RETRIES = 1
+CELERY_TASK_IGNORE_RESULT = True
 
 # Django Server Settings
 LANGUAGE_CODE = "ko-kr"

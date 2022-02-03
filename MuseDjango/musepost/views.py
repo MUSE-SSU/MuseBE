@@ -100,9 +100,11 @@ class PostViewSet(viewsets.ModelViewSet):
                     f"👍게시물 {uploaded_post.idx} 작성: {request.user.nickname}",
                 )
                 # 이미지 색상 추출
-                get_image_color.delay(uploaded_post.idx)
+                # get_image_color.delay(uploaded_post.idx)
 
                 return Response({"message": "SUCCESS"}, status=200)
+            else:
+                return Response({"message": "ERROR: POST CREATE FAIL"}, status=400)
         except:
             slack_post_message(
                 MUSE_SLACK_TOKEN,
@@ -219,7 +221,7 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             if Post.objects.filter(idx=pk, writer=request.user).exists():
                 post = Post.objects.get(idx=pk)
-                remove_all_tags_without_objects.delay()
+                remove_all_tags_without_objects.delay()  # post.tag 넘겨서 검사
                 slack_post_message(
                     MUSE_SLACK_TOKEN,
                     "#muse-dev" if DEV else "#muse-prod",
@@ -375,7 +377,6 @@ class PostViewSet(viewsets.ModelViewSet):
                 )
 
             request.user.profile.save()
-            bookmark.save()
             return Response({"is_bookmark": result}, status=200)
         except:
             slack_post_message(
@@ -451,11 +452,10 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             result = []
             top_tags = Post.hashtag.most_common()[:3]  # 최다 사용된 해시태그 3개 추출
-            print(top_tags)
-            for tag in top_tags:
 
+            for tag in top_tags:
                 queryset = Post.objects.filter(hashtag__name=tag.name)
-                print(queryset)
+
                 if len(queryset):
                     # 각 최다 해시태그가 사용된 게시물 중에서 랜덤으로 (이미지, 해시태그) 1쌍 반환
                     random_post = random.choice(queryset)
@@ -464,7 +464,6 @@ class PostViewSet(viewsets.ModelViewSet):
                         "tag": tag.name,
                     }
                     result.append(temp_dict)
-                    print(result)
 
             return Response(result, status=200)
         except:
