@@ -18,7 +18,7 @@ def integrated_search(request):
     if request.method == "GET":
         try:
             search = request.GET.get("q", None)
-
+            print(search)
             if search:
                 search = [key for key in search.split("+") if key]
                 for s in search:
@@ -67,20 +67,24 @@ def integrated_search(request):
                 else:
                     result["post"] = None
 
-                try:
-                    if request.user:
-                        search_user = request.user.nickname
-                    else:
-                        search_user = None
-                except:
-                    search_user = None
+                # try:
+                #     if request.user:
+                #         search_user = request.user.nickname
+                #     else:
+                #         search_user = None
+                # except:
+                #     search_user = None
 
                 slack_post_message(
                     MUSE_SLACK_TOKEN,
                     "#muse-dev" if DEV else "#muse-prod",
-                    f"👍 유저: {search_user}, 검색: {search}",
+                    f"👍 유저 검색: {search}",
                 )
                 return JsonResponse(result, safe=False, status=200)
+            else:
+                return JsonResponse(
+                    {"user": None, "post": None}, safe=False, status=200
+                )
         except:
             return JsonResponse({"message": "ERROR: SEARCH"}, status=400)
     else:
