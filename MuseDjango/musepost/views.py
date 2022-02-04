@@ -143,7 +143,7 @@ class PostViewSet(viewsets.ModelViewSet):
             elif order_by == "views":
                 post = qs.order_by("-views", "-created_at")
             else:  # Default: likes
-                post = qs.order_by("-likes", "-created_at")
+                post = qs.order_by("-likes", "-views")
 
             count_post = post.count()
 
