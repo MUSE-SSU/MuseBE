@@ -22,7 +22,7 @@ app.conf.beat_schedule = {
         "task": "musepost.tasks.select_weekly_tasks",
         "schedule": crontab(minute=0, hour=0, day_of_week="monday"),
     },
-    # 매일 새벽 4시 마다- 게시물 색상 추출
+    # 매일 새벽 1시부터 8시까지 1시간마다 - 게시물 색상 추출
     "extract_image_color": {
         "task": "musepost.tasks.get_image_color",
         "schedule": crontab(minute=0, hour="1, 2, 3, 4, 5, 6, 7, 8"),
@@ -37,6 +37,8 @@ app.conf.beat_schedule = {
         "task": "accounts.tasks.get_new_user_list",
         "schedule": crontab(minute=30, hour=6),
     },
+    # #
+    # "dsflsdkf": {"task": "musepost.tasks.select_week_color", "schedule": 10.0}
     # # 매일 자정 - 사용하는 게시물이 없는 해시태그 삭제
     # "delete_hashtag_not_use": {
     #     "task": "musepost.tasks.remove_all_tags_without_objects",

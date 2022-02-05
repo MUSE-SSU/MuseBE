@@ -46,10 +46,18 @@ def get_image_color():
     """이미지 색상 추출"""
     try:
         # post = Post.objects.get(idx=post_idx)
+        """
+        30개씩 나눠야함
+        """
         qs = Post.objects.filter(dominant_color=None)
 
         if qs:
+            cnt = 0
             for post in qs:
+                cnt += 1
+                if cnt > 30:
+                    break
+
                 color_thief = ColorThief(post.image)
 
                 # get domminat color
@@ -148,14 +156,13 @@ def select_muse():
     current = Topic.objects.create(week=current_week)
 
 
+@shared_task
 def select_week_color():
     """매주 일요일 00시: 이번 주 가장 많이 사용된 색상 5가지"""
     try:
         # # 지난 주 색상표 활성 상태 변경
         if ColorOfWeek.objects.all().count() >= 1:
             before_color_of_week = ColorOfWeek.objects.filter(cur_status=True)
-            # before_color_of_week.cur_status = False
-            # before_color_of_week.save()
             before_color_of_week.update(cur_status=False)
 
         week_post = Post.objects.filter(cur_status=True)
