@@ -24,7 +24,7 @@ class Post(models.Model):
     )
 
     # 본문 content
-    title = models.CharField(max_length=100, verbose_name="제목")
+    title = models.CharField(max_length=200, verbose_name="제목")
     image = models.ImageField(
         upload_to=upload_post_image, storage=PublicMediaStorage(), verbose_name="작품"
     )
@@ -34,28 +34,28 @@ class Post(models.Model):
 
     views = models.PositiveIntegerField(default=0, verbose_name="조회수")
     likes = models.PositiveIntegerField(default=0, verbose_name="좋아요")
-    topic = models.CharField(max_length=128, verbose_name="주제", null=True, blank=True)
+    topic = models.CharField(max_length=200, verbose_name="주제", null=True, blank=True)
     week = models.IntegerField(default=0, verbose_name="해당 주차", null=True, blank=True)
     hashtag = TaggableManager(blank=True)  # through=TaggedPost
     ref_url = models.CharField(
-        max_length=256, verbose_name="원본 URL", null=True, blank=True
+        max_length=1000, verbose_name="원본 URL", null=True, blank=True
     )
 
     # post color
     dominant_color = models.CharField(
-        max_length=50, null=True, blank=True, verbose_name="지배 색상"
+        max_length=100, null=True, blank=True, verbose_name="지배 색상"
     )
     palette_color1 = models.CharField(
-        max_length=50, null=True, blank=True, verbose_name="유사 색상1"
+        max_length=100, null=True, blank=True, verbose_name="유사 색상1"
     )
     palette_color2 = models.CharField(
-        max_length=50, null=True, blank=True, verbose_name="유사 색상2"
+        max_length=100, null=True, blank=True, verbose_name="유사 색상2"
     )
     palette_color3 = models.CharField(
-        max_length=50, null=True, blank=True, verbose_name="유사 색상3"
+        max_length=100, null=True, blank=True, verbose_name="유사 색상3"
     )
     category = models.CharField(
-        max_length=30,
+        max_length=50,
         blank=True,
         null=True,
         choices=POST_CATEGORY,
@@ -149,7 +149,7 @@ class Comment(models.Model):
         verbose_name="작성자",
     )
 
-    comment = models.CharField(max_length=100, verbose_name="댓글", default="None")
+    comment = models.CharField(max_length=1000, verbose_name="댓글", default="None")
     created_at = models.DateTimeField(verbose_name="최초 업로드 날짜", auto_now_add=True)
     modified_at = models.DateTimeField(verbose_name="최근 수정 날짜", auto_now=True)
 
@@ -166,11 +166,11 @@ class Comment(models.Model):
 
 class ColorOfWeek(models.Model):
     idx = models.AutoField(primary_key=True, null=False, blank=False)
-    color1 = models.CharField(max_length=50)
-    color2 = models.CharField(max_length=50)
-    color3 = models.CharField(max_length=50)
-    color4 = models.CharField(max_length=50)
-    color5 = models.CharField(max_length=50)
+    color1 = models.CharField(max_length=100)
+    color2 = models.CharField(max_length=100)
+    color3 = models.CharField(max_length=100)
+    color4 = models.CharField(max_length=100)
+    color5 = models.CharField(max_length=100)
 
     cur_status = models.BooleanField(default=True, verbose_name="이번 주 색상")
 
