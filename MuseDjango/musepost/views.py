@@ -393,9 +393,7 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             page = int(request.query_params.get("page", 1))
             current_post = Post.objects.get(idx=pk)
-        except:
-            return Response({"message": "ERROR: POST RECOMMEND > REQUEST"}, status=400)
-        try:
+
             color = [
                 current_post.dominant_color,
                 current_post.palette_color1,
@@ -422,28 +420,26 @@ class PostViewSet(viewsets.ModelViewSet):
                 )
                 .distinct()
             )
-        except:
-            return Response(
-                {"message": "ERROR: POST RECOMMEND > RECOMMEND"}, status=400
-            )
-        try:
-            PAGE_SIZE = 8
-            limit = int(page * PAGE_SIZE)
-            offset = int(limit - PAGE_SIZE)
-
-            count_post = recommend_post.count()
-
-            if count_post < offset:
-                return Response({"message": "POST COUNT LIMIT"}, status=201)
-            elif count_post < limit:
-                post_list = recommend_post[offset:count_post]
+            if not recommend_post:
+                return Response({"message": "POST RECOMMEND > NONE"}, status=200)
             else:
-                post_list = recommend_post[offset:limit]
+                PAGE_SIZE = 8
+                limit = int(page * PAGE_SIZE)
+                offset = int(limit - PAGE_SIZE)
 
-            serializer = PostDisplayAllSerializer(
-                post_list, context={"request": request}, many=True
-            )
-            return Response(serializer.data, status=200)
+                count_post = recommend_post.count()
+
+                if count_post < offset:
+                    return Response({"message": "POST COUNT LIMIT"}, status=200)
+                elif count_post < limit:
+                    post_list = recommend_post[offset:count_post]
+                else:
+                    post_list = recommend_post[offset:limit]
+
+                serializer = PostDisplayAllSerializer(
+                    post_list, context={"request": request}, many=True
+                )
+                return Response(serializer.data, status=200)
         except:
             return Response({"message": "ERROR: POST RECOMMEND > LIST"}, status=400)
 
