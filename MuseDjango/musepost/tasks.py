@@ -1,8 +1,9 @@
+import time
 from celery import shared_task
-import celery
 from django.db.models import Count, F
+from itertools import chain
 import logging
-from .models import Post, ColorOfWeek
+from .models import Post, ColorOfWeek, PostColor
 
 from colorthief import ColorThief
 import webcolors
@@ -11,10 +12,6 @@ from taggit.models import Tag
 from config.settings import MUSE_SLACK_TOKEN, DEV
 from common.slack_api import slack_post_message
 from topics.models import Topic
-
-# from celery import Celery
-
-# app = Celery("config")
 
 logger = logging.getLogger("api")
 
@@ -45,29 +42,15 @@ def get_colour_name(requested_colour):
 def get_image_color():
     """이미지 색상 추출"""
     try:
-        # post = Post.objects.get(idx=post_idx)
-        """
-        30개씩 나눠야함
-        """
-        qs = Post.objects.filter(dominant_color=None)
+        start_time = time.time()
+        qs = Post.objects.filter(is_extract_color=False)
 
         if qs:
-            cnt = 0
             for post in qs:
-                cnt += 1
-                if cnt > 30:
-                    break
-
                 color_thief = ColorThief(post.image)
 
-                # get domminat color
-                dominant_color = color_thief.get_color(quality=1)
-                dominant_actual_name, dominant_closest_name = get_colour_name(
-                    dominant_color
-                )
-
                 # get palette color
-                palette = color_thief.get_palette(color_count=3)
+                palette = color_thief.get_palette(color_count=5, quality=5)
                 plt_name = []
                 for plt in palette:
                     plt_actual_name, plt_closest_name = get_colour_name(plt)
@@ -77,15 +60,8 @@ def get_image_color():
                         plt_name.append(plt_closest_name)
 
                 # Replace Color Name with Spacing & Upper Case
-                temp_colors = []
-                if dominant_actual_name:
-                    temp_colors.append(dominant_actual_name)
-                else:
-                    temp_colors.append(dominant_closest_name)
-                temp_colors.extend(plt_name)
-
                 replace_colors = []
-                for idx, full_color in enumerate(temp_colors):
+                for idx, full_color in enumerate(plt_name):
                     replace_color_name = full_color
                     for key, value in COLOR_CHECK.items():
                         if key in replace_color_name:
@@ -95,17 +71,25 @@ def get_image_color():
                     replace_colors.append(replace_color_name.rstrip())
 
                 # save color
-                post.dominant_color = replace_colors[0]
-                post.palette_color1 = replace_colors[1]
-                post.palette_color2 = replace_colors[2]
-                post.palette_color3 = replace_colors[3]
+                post_color = PostColor.objects.create(
+                    post=post,
+                    palette_color1=replace_colors[0],
+                    palette_color2=replace_colors[1],
+                    palette_color3=replace_colors[2],
+                    palette_color4=replace_colors[3],
+                    palette_color5=replace_colors[4],
+                )
 
+                post.is_extract_color = True
                 post.save()
+
+                if time.time() - start_time >= 1800:  # 30분이상
+                    break
 
         slack_post_message(
             MUSE_SLACK_TOKEN,
             "#muse-dev" if DEV else "#muse-prod",
-            f"🛠 이미지 색상 추출 완료",
+            f"🛠 게시물 이미지 색상 추출 완료",
         )
     except:
         slack_post_message(
@@ -160,74 +144,49 @@ def select_muse():
 def select_week_color():
     """매주 일요일 00시: 이번 주 가장 많이 사용된 색상 5가지"""
     try:
-        # # 지난 주 색상표 활성 상태 변경
+        # 지난 주 색상표 활성 상태 변경
         if ColorOfWeek.objects.all().count() >= 1:
             before_color_of_week = ColorOfWeek.objects.filter(cur_status=True)
             before_color_of_week.update(cur_status=False)
 
-        week_post = Post.objects.filter(cur_status=True)
-        week_dominant_color = (
-            week_post.values("dominant_color")
-            .annotate(count=Count("dominant_color"))
-            .order_by("-count")
+        week_post = PostColor.objects.filter(
+            post__cur_status=True, post__is_extract_color=True
         )
+        # 색상 그룹화 -> Count
+        color1 = week_post.values(
+            color=F("palette_color1"),
+        ).annotate(count=Count("color"))
+        color2 = week_post.values(
+            color=F("palette_color2"),
+        ).annotate(count=Count("color"))
+        color3 = week_post.values(
+            color=F("palette_color3"),
+        ).annotate(count=Count("color"))
+        color4 = week_post.values(
+            color=F("palette_color4"),
+        ).annotate(count=Count("color"))
+        color5 = week_post.values(
+            color=F("palette_color5"),
+        ).annotate(count=Count("color"))
 
-        if week_dominant_color.count() >= 5:
-            cow = ColorOfWeek.objects.create(
-                color1=week_dominant_color[0]["dominant_color"],
-                color2=week_dominant_color[1]["dominant_color"],
-                color3=week_dominant_color[2]["dominant_color"],
-                color4=week_dominant_color[3]["dominant_color"],
-                color5=week_dominant_color[4]["dominant_color"],
-            )
-        else:
-            additional_color = []
-            for i, color in enumerate(week_dominant_color):
-                additional_color.append(color["dominant_color"])
+        color_list = color1.union(color2, color3, color4, color5, all=True)
 
-                week_palette_color1 = (
-                    week_post.annotate(
-                        palette_color=F("palette_color1"), count=Count("palette_color1")
-                    )
-                    .values("palette_color", "count")
-                    .order_by("-count")
-                )[:3]
-                week_palette_color2 = (
-                    week_post.annotate(
-                        palette_color=F("palette_color2"), count=Count("palette_color2")
-                    )
-                    .values("palette_color", "count")
-                    .order_by("-count")
-                )[:3]
-                week_palette_color3 = (
-                    week_post.annotate(
-                        palette_color=F("palette_color3"), count=Count("palette_color3")
-                    )
-                    .values("palette_color", "count")
-                    .order_by("-count")
-                )[:3]
+        temp = {}
+        for c in color_list:
+            if c["color"] in temp:
+                temp[c["color"]] += c["count"]
+            else:
+                temp[c["color"]] = c["count"]
 
-                week_palette_color = (
-                    list(week_palette_color1)
-                    + list(week_palette_color2)
-                    + list(week_palette_color3)
-                )
+        weekly_color = sorted(temp.items(), reverse=True, key=lambda item: item[1])[:5]
 
-                cnt = 5 - len(additional_color)
-                i = 0
-                while cnt > 0:
-                    if week_palette_color[i]["palette_color"] not in additional_color:
-                        additional_color.append(week_palette_color[i]["palette_color"])
-                        cnt -= 1
-                    i += 1
-
-                cow = ColorOfWeek.objects.create(
-                    color1=additional_color[0],
-                    color2=additional_color[1],
-                    color3=additional_color[2],
-                    color4=additional_color[3],
-                    color5=additional_color[4],
-                )
+        cow = ColorOfWeek.objects.create(
+            color1=weekly_color[0][0],
+            color2=weekly_color[1][0],
+            color3=weekly_color[2][0],
+            color4=weekly_color[3][0],
+            color5=weekly_color[4][0],
+        )
 
         logger.info(f"INFO: CREATE WEEKLY COLOR > {cow}")
     except:
@@ -235,7 +194,7 @@ def select_week_color():
 
 
 def change_post_status():
-    """매주 일요일 00시 30분: 이번 주의 전체 게시물(레퍼런스, 콘테스트) 현재 진행 상태 변경"""
+    """이번 주의 전체 게시물(레퍼런스, 콘테스트) 현재 진행 상태 변경"""
     all_cur_post = Post.objects.filter(cur_status=True)
     all_cur_post.update(cur_status=False)
 

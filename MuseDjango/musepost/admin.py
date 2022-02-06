@@ -85,6 +85,7 @@ class PostAdmin(admin.ModelAdmin):
         "week",
         "get_hashtag",
         "ref_url",
+        "is_extract_color",
         "dominant_color",
         "palette_color1",
         "palette_color2",
@@ -92,6 +93,7 @@ class PostAdmin(admin.ModelAdmin):
         "category",
         "cur_status",
         "usage",
+        "is_extract_color",
         "is_muse",
         "created_at",
         "modified_at",
@@ -112,6 +114,20 @@ class PostAdmin(admin.ModelAdmin):
     actions = [admin_get_image_color]
     list_per_page = 20
 
+
+class PostColorAdmin(admin.ModelAdmin):
+    list_display = [
+        "idx",
+        "get_post_id",
+        "palette_color1",
+        "palette_color2",
+        "palette_color3",
+        "palette_color4",
+        "palette_color5",
+    ]
+    def get_post_id(self, obj):
+        return obj.post.idx
+    get_post_id.short_description = "게시글"  # Renames column head
 
 class PostLikeAdmin(admin.ModelAdmin):
     list_display = ["idx", "get_post_id", "get_like_user_id"]
@@ -172,6 +188,7 @@ class ColorOfWeekAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Post, PostAdmin)
+admin.site.register(PostColor, PostColorAdmin)
 admin.site.register(PostLike, PostLikeAdmin)
 admin.site.register(PostBookmark, PostBookmarkAdmin)
 admin.site.register(Comment, CommentAdmin)

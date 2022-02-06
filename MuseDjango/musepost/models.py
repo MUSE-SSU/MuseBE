@@ -36,7 +36,7 @@ class Post(models.Model):
     likes = models.PositiveIntegerField(default=0, verbose_name="좋아요")
     topic = models.CharField(max_length=200, verbose_name="주제", null=True, blank=True)
     week = models.IntegerField(default=0, verbose_name="해당 주차", null=True, blank=True)
-    hashtag = TaggableManager(blank=True)  # through=TaggedPost
+    hashtag = TaggableManager(blank=True)
     ref_url = models.CharField(
         max_length=1000, verbose_name="원본 URL", null=True, blank=True
     )
@@ -54,6 +54,8 @@ class Post(models.Model):
     palette_color3 = models.CharField(
         max_length=100, null=True, blank=True, verbose_name="유사 색상3"
     )
+
+    is_extract_color = models.BooleanField(default=False)
     category = models.CharField(
         max_length=50,
         blank=True,
@@ -78,6 +80,39 @@ class Post(models.Model):
 
     def __str__(self):
         return str(self.idx)
+
+
+class PostColor(models.Model):
+    idx = models.AutoField(primary_key=True, null=False, blank=False)
+
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        db_column="post_idx",
+        related_name="post_color",
+        verbose_name="게시글",
+    )
+
+    palette_color1 = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="색상1"
+    )
+    palette_color2 = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="색상2"
+    )
+    palette_color3 = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="색상3"
+    )
+    palette_color4 = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="색상4"
+    )
+    palette_color5 = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="색상5"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "MUSE_PostColor"
+        verbose_name_plural = "게시글 색상"
 
 
 class PostLike(models.Model):
