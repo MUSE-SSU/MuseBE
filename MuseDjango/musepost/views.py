@@ -392,8 +392,8 @@ class PostViewSet(viewsets.ModelViewSet):
         # pk는 현재 보고있는 게시물의 idx
         try:
             page = int(request.query_params.get("page", 1))
-            current_post = Post.objects.prefetch_related("post_color").get(idx=pk)
-            current_post_color = current_post.post_color.all()[0]
+            current_post_color = PostColor.objects.get(post=pk)
+            # current_post_color = current_post.post_color
         except:
             return Response({"message": "POST RECOMMEND > NONE COLOR"}, status=400)
         try:
@@ -425,10 +425,9 @@ class PostViewSet(viewsets.ModelViewSet):
                 operator.or_,
                 (Q(post_color__palette_color5__icontains=c) for c in color),
             )
+
             recommend_post = (
-                Post.objects.filter(
-                    category=current_post.category, is_extract_color=True
-                )
+                Post.objects.prefetch_related("post_color")
                 .exclude(idx=pk)
                 .filter(
                     palette1_query

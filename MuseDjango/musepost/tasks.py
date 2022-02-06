@@ -133,14 +133,13 @@ def select_muse():
     muse_post.writer.profile.badge = 5
     muse_post.writer.profile.save()
     # 콘테스트 주제 week 변경
-    past_topic = Topic.objects.filter(activate_week=True)
+    past_topic = Topic.objects.get(activate_week=True)
     past_topic.activate_week = False
-    past_topic.save()
     current_week = past_topic.week + 1
-    current = Topic.objects.create(week=current_week)
+    past_topic.save()
+    Topic.objects.create(week=current_week)
 
 
-@shared_task
 def select_week_color():
     """매주 일요일 00시: 이번 주 가장 많이 사용된 색상 5가지"""
     try:
@@ -152,7 +151,7 @@ def select_week_color():
         week_post = PostColor.objects.filter(
             post__cur_status=True, post__is_extract_color=True
         )
-        # 색상 그룹화 -> Count
+
         color1 = week_post.values(
             color=F("palette_color1"),
         ).annotate(count=Count("color"))

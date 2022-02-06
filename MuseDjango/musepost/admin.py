@@ -75,29 +75,28 @@ admin_get_image_color.short_description = "이미지 색상 추출"
 class PostAdmin(admin.ModelAdmin):
     list_display = [
         "idx",
-        "writer",
+        "get_writer",
         "title",
-        "get_image",
         "content",
         "views",
         "likes",
+        "get_image",
+        "get_hashtag",
+        "category",
+        "ref_url",
         "topic",
         "week",
-        "get_hashtag",
-        "ref_url",
+        "is_muse",
         "is_extract_color",
-        "dominant_color",
-        "palette_color1",
-        "palette_color2",
-        "palette_color3",
-        "category",
         "cur_status",
         "usage",
-        "is_extract_color",
-        "is_muse",
         "created_at",
         "modified_at",
     ]
+    search_fields = ["title", "writer__nickname"]
+
+    def get_writer(self, obj):
+        return obj.writer.nickname
 
     def get_image(self, obj):
         return str(obj.image)[:22]
@@ -125,9 +124,12 @@ class PostColorAdmin(admin.ModelAdmin):
         "palette_color4",
         "palette_color5",
     ]
+
     def get_post_id(self, obj):
         return obj.post.idx
+
     get_post_id.short_description = "게시글"  # Renames column head
+
 
 class PostLikeAdmin(admin.ModelAdmin):
     list_display = ["idx", "get_post_id", "get_like_user_id"]

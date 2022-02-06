@@ -32,10 +32,10 @@ app.conf.beat_schedule = {
         "task": "accounts.tasks.calc_user_score_to_badge",
         "schedule": crontab(minute=0, hour="*/1"),
     },
-    # 매일 06시 30분 - 새로 가입한 유저 리스트 슬랙 전달
+    # 매주 월요일 06시 30분 - 지난 주 새로 가입한 유저 리스트 슬랙 전달
     "slack_to_new_user_list": {
         "task": "accounts.tasks.get_new_user_list",
-        "schedule": crontab(minute=30, hour=6),
+        "schedule": crontab(minute=30, hour=6, day_of_week="monday"),
     },
     # # 매일 자정 - 사용하는 게시물이 없는 해시태그 삭제
     # "delete_hashtag_not_use": {
