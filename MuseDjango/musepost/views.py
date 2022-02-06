@@ -392,34 +392,53 @@ class PostViewSet(viewsets.ModelViewSet):
         # pk는 현재 보고있는 게시물의 idx
         try:
             page = int(request.query_params.get("page", 1))
-            current_post = Post.objects.get(idx=pk)
-
+            current_post_color = PostColor.objects.get(post=pk)
+            # current_post_color = current_post.post_color
+        except:
+            return Response({"message": "POST RECOMMEND > NONE COLOR"}, status=400)
+        try:
             color = [
-                current_post.dominant_color,
-                current_post.palette_color1,
-                current_post.palette_color2,
-                current_post.palette_color3,
+                current_post_color.palette_color1,
+                current_post_color.palette_color2,
+                current_post_color.palette_color3,
+                current_post_color.palette_color4,
+                current_post_color.palette_color5,
             ]
-            dominant_query = reduce(
-                operator.or_, (Q(dominant_color__icontains=c) for c in color)
-            )
+
             palette1_query = reduce(
-                operator.or_, (Q(palette_color1__icontains=c) for c in color)
+                operator.or_,
+                (Q(post_color__palette_color1__icontains=c) for c in color),
             )
             palette2_query = reduce(
-                operator.or_, (Q(palette_color2__icontains=c) for c in color)
+                operator.or_,
+                (Q(post_color__palette_color2__icontains=c) for c in color),
             )
             palette3_query = reduce(
-                operator.or_, (Q(palette_color3__icontains=c) for c in color)
+                operator.or_,
+                (Q(post_color__palette_color3__icontains=c) for c in color),
             )
+            palette4_query = reduce(
+                operator.or_,
+                (Q(post_color__palette_color4__icontains=c) for c in color),
+            )
+            palette5_query = reduce(
+                operator.or_,
+                (Q(post_color__palette_color5__icontains=c) for c in color),
+            )
+
             recommend_post = (
-                Post.objects.filter(category=current_post.category)
+                Post.objects.prefetch_related("post_color")
                 .exclude(idx=pk)
                 .filter(
-                    dominant_query | palette1_query | palette2_query | palette3_query
+                    palette1_query
+                    | palette2_query
+                    | palette3_query
+                    | palette4_query
+                    | palette5_query
                 )
                 .distinct()
             )
+
             if not recommend_post:
                 return Response({"message": "POST RECOMMEND > NONE"}, status=200)
             else:

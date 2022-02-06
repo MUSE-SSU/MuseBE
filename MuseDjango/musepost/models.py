@@ -36,24 +36,11 @@ class Post(models.Model):
     likes = models.PositiveIntegerField(default=0, verbose_name="좋아요")
     topic = models.CharField(max_length=200, verbose_name="주제", null=True, blank=True)
     week = models.IntegerField(default=0, verbose_name="해당 주차", null=True, blank=True)
-    hashtag = TaggableManager(blank=True)  # through=TaggedPost
+    hashtag = TaggableManager(blank=True)
     ref_url = models.CharField(
         max_length=1000, verbose_name="원본 URL", null=True, blank=True
     )
 
-    # post color
-    dominant_color = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name="지배 색상"
-    )
-    palette_color1 = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name="유사 색상1"
-    )
-    palette_color2 = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name="유사 색상2"
-    )
-    palette_color3 = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name="유사 색상3"
-    )
     category = models.CharField(
         max_length=50,
         blank=True,
@@ -61,11 +48,10 @@ class Post(models.Model):
         choices=POST_CATEGORY,
         verbose_name="게시물 카테고리",
     )
-    # 콘테스트 참가 여부 / 현재 상태 / 뮤즈 선정
-    # is_reference = models.BooleanField(default=False, verbose_name="레퍼런스 게시물")
-    # is_contest = models.BooleanField(default=True, verbose_name="콘테스트 게시물")
+
     cur_status = models.BooleanField(default=True, verbose_name="이번 주 게시물")
     is_muse = models.BooleanField(default=False, verbose_name="MUSE 선정 여부")
+    is_extract_color = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(verbose_name="최초 업로드 날짜", auto_now_add=True)
     modified_at = models.DateTimeField(verbose_name="최근 수정 날짜", auto_now=True)
@@ -78,6 +64,39 @@ class Post(models.Model):
 
     def __str__(self):
         return str(self.idx)
+
+
+class PostColor(models.Model):
+    idx = models.AutoField(primary_key=True, null=False, blank=False)
+
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        db_column="post_idx",
+        related_name="post_color",
+        verbose_name="게시글",
+    )
+
+    palette_color1 = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="색상1"
+    )
+    palette_color2 = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="색상2"
+    )
+    palette_color3 = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="색상3"
+    )
+    palette_color4 = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="색상4"
+    )
+    palette_color5 = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="색상5"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "MUSE_Post_Color"
+        verbose_name_plural = "게시글 색상"
 
 
 class PostLike(models.Model):

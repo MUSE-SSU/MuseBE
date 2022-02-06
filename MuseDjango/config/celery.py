@@ -17,31 +17,31 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
-    # 매주 일요일 자정 - 뮤즈 선정/이번 주 색상 선정/게시물 상태 변경
+    # 매주 월요일 자정 - 뮤즈 선정/이번 주 색상 선정/게시물 상태 변경
     "select_weekly_tasks": {
         "task": "musepost.tasks.select_weekly_tasks",
-        "schedule": crontab(minute=0, hour=0, day_of_week="sunday"),
+        "schedule": crontab(minute=0, hour=0, day_of_week="monday"),
     },
-    # 매일 새벽 4시 마다- 게시물 색상 추출
+    # 매일 새벽 1시부터 8시까지 1시간마다 - 게시물 색상 추출
     "extract_image_color": {
         "task": "musepost.tasks.get_image_color",
-        "schedule": crontab(minute=0, hour=4),
+        "schedule": crontab(minute=0, hour="1, 2, 3, 4, 5, 6, 7, 8"),
+    },
+    # 매일 1시간 마다 - 유저 Score 계산 후 뱃지 지급
+    "calc_user_score": {
+        "task": "accounts.tasks.calc_user_score_to_badge",
+        "schedule": crontab(minute=0, hour="*/1"),
+    },
+    # 매주 월요일 06시 30분 - 지난 주 새로 가입한 유저 리스트 슬랙 전달
+    "slack_to_new_user_list": {
+        "task": "accounts.tasks.get_new_user_list",
+        "schedule": crontab(minute=30, hour=6, day_of_week="monday"),
     },
     # # 매일 자정 - 사용하는 게시물이 없는 해시태그 삭제
     # "delete_hashtag_not_use": {
     #     "task": "musepost.tasks.remove_all_tags_without_objects",
     #     "schedule": crontab(minute=0, hour=0),
     # },
-    # 매일 1시간 마다 - 유저 Score 계산 후 뱃지 지급
-    "calc_user_score": {
-        "task": "accounts.tasks.calc_user_score_to_badge",
-        "schedule": crontab(minute=0, hour="*/1"),
-    },
-    # 매주 일요일 자정 - 새로 가입한 유저 리스트 슬랙 전달
-    "slack_to_new_user_list": {
-        "task": "accounts.tasks.get_new_user_list",
-        "schedule": crontab(minute=0, hour=0, day_of_week="sunday"),
-    },
 }
 
 

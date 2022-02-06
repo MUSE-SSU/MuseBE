@@ -17,10 +17,12 @@ from functools import reduce
 def integrated_search(request):
     if request.method == "GET":
         try:
-            search = request.GET.get("q", None)
-            print(search)
-            if search:
-                search = [key for key in search.split("+") if key]
+            raw_search = request.GET.get("q", None)
+
+            if raw_search:
+                search = [key for key in raw_search.split("+") if key]
+                raw_search = "".join(raw_search.split("+"))
+
                 for s in search:
                     if s == "gray" or s == "Gray":
                         search.append("grey")
@@ -48,16 +50,22 @@ def integrated_search(request):
                 post_writer_query = reduce(
                     operator.or_, (Q(writer__nickname__icontains=key) for key in search)
                 )
-                post_color_query = reduce(
-                    operator.or_, (Q(dominant_color__icontains=key) for key in search)
+
+                post_queryset = (
+                    Post.objects.prefetch_related("post_color")
+                    .filter(
+                        Q(hashtag__name__in=search)
+                        | post_title_query
+                        | post_content_query
+                        | post_writer_query
+                        | Q(post_color__palette_color1__icontains=raw_search)
+                        | Q(post_color__palette_color2__icontains=raw_search)
+                        | Q(post_color__palette_color3__icontains=raw_search)
+                        | Q(post_color__palette_color4__icontains=raw_search)
+                        | Q(post_color__palette_color5__icontains=raw_search)
+                    )
+                    .distinct()
                 )
-                post_queryset = Post.objects.filter(
-                    Q(hashtag__name__in=search)
-                    | post_title_query
-                    | post_content_query
-                    | post_writer_query
-                    | post_color_query
-                ).distinct()
 
                 if post_queryset:
                     post_serializer = PostDisplayAllSerializer(
