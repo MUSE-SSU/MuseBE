@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "musepost",
     "topics",
     "notice",
+    "notification",
 ]
 
 MIDDLEWARE = [

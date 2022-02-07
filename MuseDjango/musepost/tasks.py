@@ -49,8 +49,8 @@ def get_image_color():
             for post in qs:
                 color_thief = ColorThief(post.image)
 
-                # get palette color
-                palette = color_thief.get_palette(color_count=5, quality=5)
+                # get palette color - quality 1 is highest ~ lowest 10
+                palette = color_thief.get_palette(color_count=5, quality=1)
                 plt_name = []
                 for plt in palette:
                     plt_actual_name, plt_closest_name = get_colour_name(plt)

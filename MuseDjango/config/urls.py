@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from accounts import views as account_views
 from musepost import views as post_views
 from notice import views as notice_views
+from notification import views as notification_views
 from common import search as search_views
 from common import health_check
 from .settings import DEV
@@ -25,6 +26,9 @@ router.register(r"post", post_views.PostViewSet, basename="post")
 router.register(r"comment", post_views.CommentViewSet, basename="comment")
 router.register(r"notice", notice_views.NoticeViewSet, basename="notice")
 router.register(r"banner", notice_views.BannerViewSet, basename="banner")
+router.register(
+    r"notification", notification_views.NotificationViewSet, basename="notification"
+)
 
 urlpatterns = [
     path("", health_check.index, name="health-check-home"),

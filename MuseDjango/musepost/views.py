@@ -25,6 +25,7 @@ from common.authentication import (
 from .serializers import *
 import random
 from .tasks import get_image_color, remove_all_tags_without_objects
+from notification.tasks import check_notification
 import logging
 
 logger = logging.getLogger("api")
@@ -341,6 +342,8 @@ class PostViewSet(viewsets.ModelViewSet):
                     "#muse-dev" if DEV else "#muse-prod",
                     f"👍게시물 {post.idx} 좋아요: {request.user.nickname}",
                 )
+                check_notification.delay(post.idx, "like")
+
             request.user.profile.save()
             post.save()
             return Response({"is_like": result}, status=200)
@@ -375,6 +378,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     "#muse-dev" if DEV else "#muse-prod",
                     f"👍게시물 {post.idx} 북마크: {request.user.nickname}",
                 )
+                check_notification.delay(post.idx, "bookmark")
 
             request.user.profile.save()
             return Response({"is_bookmark": result}, status=200)
@@ -513,6 +517,7 @@ class CommentViewSet(viewsets.ModelViewSet):
                     "#muse-dev" if DEV else "#muse-prod",
                     f"👍댓글 post({post_idx}) 작성: {request.user.nickname}, {comment}",
                 )
+                check_notification.delay(post_idx, "comment")
 
                 return Response({"message": "SUCCESS"}, status=200)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
