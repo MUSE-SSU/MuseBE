@@ -63,6 +63,7 @@ COPY $DOCKER_SRC/accounts $DOCKER_SRVPROJ/accounts
 COPY $DOCKER_SRC/musepost $DOCKER_SRVPROJ/musepost
 COPY $DOCKER_SRC/topics $DOCKER_SRVPROJ/topics
 COPY $DOCKER_SRC/notice $DOCKER_SRVPROJ/notice
+COPY $DOCKER_SRC/notification $DOCKER_SRVPROJ/notification
 
 # EXPOSE: 네트워크 상에서 컨테이너로 들어오는 트래픽 리스닝하는 포트와 프로토콜 지정.
 # 프로토콜 지정 안하면 기본값 TCP

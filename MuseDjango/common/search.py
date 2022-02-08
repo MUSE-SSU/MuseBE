@@ -21,7 +21,7 @@ def integrated_search(request):
 
             if raw_search:
                 search = [key for key in raw_search.split("+") if key]
-                raw_search = "".join(raw_search.split("+"))
+                raw_search = " ".join(raw_search.split("+"))
 
                 for s in search:
                     if s == "gray" or s == "Gray":

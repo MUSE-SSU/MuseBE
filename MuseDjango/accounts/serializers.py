@@ -3,6 +3,8 @@ from .models import *
 from config.settings import MEDIA_URL
 from musepost.models import Post
 from musepost.serializers import PostDisplayAllSerializer
+from notification.models import Notification
+from django.db.models import Count
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -23,6 +25,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
     self_introduce = serializers.SerializerMethodField()
     insta_id = serializers.SerializerMethodField()
     score = serializers.SerializerMethodField()
+    noti_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -33,7 +36,16 @@ class UserInfoSerializer(serializers.ModelSerializer):
             "insta_id",
             "badge",
             "score",
+            "noti_count",
         )
+
+    def get_noti_count(self, obj):
+        noti = Notification.objects.filter(user=obj, is_read=False)
+        total_count = 0
+        for n in noti:
+            total_count += n.count
+
+        return total_count
 
     def get_score(self, obj):
         return obj.profile.score
