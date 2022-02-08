@@ -14,7 +14,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         try:
-            # 읽은 알림, 안읽은 알림 모두 전달 -> 프론트에서 다르게 표현
             noti = Notification.objects.filter(user=request.user).order_by("-id")
             serializer = NotificationSerializer(noti, many=True)
             noti.update(is_read=True)
