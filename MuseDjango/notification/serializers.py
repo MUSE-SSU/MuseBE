@@ -10,8 +10,6 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ("post", "post_title", "category", "count", "is_read", "created_at")
-        # 여기서 count는 읽지않은 각 알림 카테고리별 count
-        # ex) 해당 게시글(post_idx)에 3개의 좋아요를 받았어요!
 
     def get_post_title(self, obj):
         return obj.post.title
