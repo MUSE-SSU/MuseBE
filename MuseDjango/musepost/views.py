@@ -530,7 +530,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             )
             return Response({"message": "ERROR: COMMENT CREATE"}, status=400)
 
-    # 댓글 리스트
+    # 댓글 리스트 여기서 뽑게 수정
     def list(self, request):
         # GET host/api/comment/
         # CommentDisplaySerializer
