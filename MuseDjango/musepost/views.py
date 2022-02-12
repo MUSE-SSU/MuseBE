@@ -531,10 +531,16 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response({"message": "ERROR: COMMENT CREATE"}, status=400)
 
     # 댓글 리스트 여기서 뽑게 수정
-    def list(self, request):
+    def retrieve(self, request, pk=None):
         # GET host/api/comment/
-        # CommentDisplaySerializer
-        pass
+        try:
+            qs = Comment.objects.filter(post=pk)
+            serializer = CommentDisplaySerializer(
+                qs, context={"login_user": request.user}, many=True
+            )
+            return Response(serializer.data, status=200)
+        except:
+            return Response({"message": "ERROR: COMMENT RETRIEVE"}, status=400)
 
     @action(detail=True, methods=["post"])
     def delete(self, request, pk=None):
