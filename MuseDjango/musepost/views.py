@@ -307,7 +307,7 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({"message": "ERROR: PREVIEW MUSE"}, status=400)
 
     @action(detail=False, methods=["get"])
-    def list_muse(self, request):
+    def muse(self, request):
         # GET host/post/list_muse
         # muse 선정된 게시물, 최신 주차별로 정렬
         try:
