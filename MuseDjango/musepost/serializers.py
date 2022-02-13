@@ -290,3 +290,46 @@ class ColorOfWeekSerializer(serializers.ModelSerializer):
         except:
             result.append("#0000ffff")
         return result
+
+
+class MuseProfileSerializer(serializers.ModelSerializer):
+    self_introduce = serializers.SerializerMethodField()
+    insta_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            "self_introduce",
+            "insta_id",
+        )
+
+    def get_insta_id(self, obj):
+        return obj.profile.insta_id
+
+    def get_self_introduce(self, obj):
+        return obj.profile.self_introduce
+
+
+class MuseDisplaySerializer(serializers.ModelSerializer):
+    post = serializers.SerializerMethodField()
+    profile = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Post
+        fields = ("post", "profile")
+
+    def get_post(self, obj):
+        try:
+            rq = self.context.get("request")
+        except:
+            rq = None
+        serializer = PostDisplayAllSerializer(obj, context={"request": rq})
+        return serializer.data
+
+    def get_profile(self, obj):
+        try:
+            user = User.objects.get(user_id=obj.writer)
+            serializer = MuseProfileSerializer(user)
+            return serializer.data
+        except:
+            return None

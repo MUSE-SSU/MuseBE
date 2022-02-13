@@ -144,7 +144,7 @@ class MyPageSerializer(serializers.ModelSerializer):
     owner_info = serializers.SerializerMethodField()
 
     class Meta:
-        model = Post
+        model = Post  # User
         fields = (
             "is_owner",
             "owner_info",

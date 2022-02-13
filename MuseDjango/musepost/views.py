@@ -312,7 +312,7 @@ class PostViewSet(viewsets.ModelViewSet):
         # muse 선정된 게시물, 최신 주차별로 정렬
         try:
             post = Post.objects.filter(is_muse=True).order_by("-week", "-created_at")
-            serializer = PostDisplayAllSerializer(
+            serializer = MuseDisplaySerializer(
                 post, context={"request": request}, many=True
             )
             return Response(serializer.data, status=200)
