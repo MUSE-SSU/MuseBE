@@ -172,7 +172,7 @@ class PostViewSet(viewsets.ModelViewSet):
             post.views += 1
             post.save()
             serializer = PostDisplayDetailSerializer(post, context={"request": request})
-            print(serializer.data["comment"])
+
             return Response(serializer.data, status=200)
         except:
             return Response({"message": "ERROR: POST RETRIEVE"}, status=400)
