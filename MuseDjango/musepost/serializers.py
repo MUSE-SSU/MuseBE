@@ -145,7 +145,6 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
     writer_avatar = serializers.SerializerMethodField()
     badge = serializers.SerializerMethodField()
     hashtag = serializers.SerializerMethodField()
-    comment = serializers.SerializerMethodField()
     is_login_user_liked = serializers.SerializerMethodField()
     is_writer = serializers.SerializerMethodField()
     is_login_user_follow = serializers.SerializerMethodField()
@@ -174,7 +173,6 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             "created_at",
             "modified_at",
             "hashtag",
-            "comment",
         )
 
     def get_badge(self, obj):
@@ -227,16 +225,16 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
     def get_hashtag(self, obj):
         return list(obj.hashtag.names())
 
-    def get_comment(self, obj):
-        comment_obj = Comment.objects.filter(post=obj.idx)
-        try:
-            login_user = self.context.get("request").user
-        except:
-            login_user = None
-        comment_serialized = CommentDisplaySerializer(
-            comment_obj, context={"login_user": login_user}, many=True
-        )
-        return comment_serialized.data
+    # def get_comment(self, obj):
+    #     comment_obj = Comment.objects.filter(post=obj.idx)
+    #     try:
+    #         login_user = self.context.get("request").user
+    #     except:
+    #         login_user = None
+    #     comment_serialized = CommentDisplaySerializer(
+    #         comment_obj, context={"login_user": login_user}, many=True
+    #     )
+    #     return comment_serialized.data
 
     def get_is_writer(self, obj):
         try:
@@ -290,3 +288,46 @@ class ColorOfWeekSerializer(serializers.ModelSerializer):
         except:
             result.append("#0000ffff")
         return result
+
+
+class MuseProfileSerializer(serializers.ModelSerializer):
+    self_introduce = serializers.SerializerMethodField()
+    insta_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            "self_introduce",
+            "insta_id",
+        )
+
+    def get_insta_id(self, obj):
+        return obj.profile.insta_id
+
+    def get_self_introduce(self, obj):
+        return obj.profile.self_introduce
+
+
+class MuseDisplaySerializer(serializers.ModelSerializer):
+    post = serializers.SerializerMethodField()
+    profile = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Post
+        fields = ("post", "profile")
+
+    def get_post(self, obj):
+        try:
+            rq = self.context.get("request")
+        except:
+            rq = None
+        serializer = PostDisplayAllSerializer(obj, context={"request": rq})
+        return serializer.data
+
+    def get_profile(self, obj):
+        try:
+            user = User.objects.get(user_id=obj.writer)
+            serializer = MuseProfileSerializer(user)
+            return serializer.data
+        except:
+            return None

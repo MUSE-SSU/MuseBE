@@ -172,7 +172,7 @@ class PostViewSet(viewsets.ModelViewSet):
             post.views += 1
             post.save()
             serializer = PostDisplayDetailSerializer(post, context={"request": request})
-            print(serializer.data["comment"])
+
             return Response(serializer.data, status=200)
         except:
             return Response({"message": "ERROR: POST RETRIEVE"}, status=400)
@@ -307,12 +307,12 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({"message": "ERROR: PREVIEW MUSE"}, status=400)
 
     @action(detail=False, methods=["get"])
-    def list_muse(self, request):
+    def muse(self, request):
         # GET host/post/list_muse
         # muse 선정된 게시물, 최신 주차별로 정렬
         try:
             post = Post.objects.filter(is_muse=True).order_by("-week", "-created_at")
-            serializer = PostDisplayAllSerializer(
+            serializer = MuseDisplaySerializer(
                 post, context={"request": request}, many=True
             )
             return Response(serializer.data, status=200)
@@ -532,7 +532,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     # 댓글 리스트 여기서 뽑게 수정
     def retrieve(self, request, pk=None):
-        # GET host/api/comment/
+        # GET host/api/comment/pk/
         try:
             qs = Comment.objects.filter(post=pk)
             serializer = CommentDisplaySerializer(
@@ -541,27 +541,6 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=200)
         except:
             return Response({"message": "ERROR: COMMENT RETRIEVE"}, status=400)
-
-    @action(detail=True, methods=["post"])
-    def delete(self, request, pk=None):
-        try:
-            if Comment.objects.filter(idx=pk, writer=request.user).exists():
-                Comment.objects.get(idx=pk).delete()
-                slack_post_message(
-                    MUSE_SLACK_TOKEN,
-                    "#muse-dev" if DEV else "#muse-prod",
-                    f"댓글 삭제: {request.user.nickname}, comment {pk}",
-                )
-                return Response(status=200)
-            else:
-                return Response({"message": "ERROR: COMMENT DELETE > NONE"}, status=400)
-        except:
-            slack_post_message(
-                MUSE_SLACK_TOKEN,
-                "#muse-dev-error" if DEV else "#muse-prod-error",
-                f"댓글 삭제 ERROR: {request.user.nickname}, comment {pk}",
-            )
-            return Response({"message": "ERROR: COMMENT DELETE"}, status=401)
 
     def destroy(self, request, pk=None):
         # DELETE host/comment/pk/
@@ -574,6 +553,9 @@ class CommentViewSet(viewsets.ModelViewSet):
                     f"댓글 삭제: {request.user.nickname}, comment {pk}",
                 )
                 c.delete()
+                return Response(status=200)
+            else:
+                return Response({"message": "ERROR: None Comment"}, status=400)
         except:
             slack_post_message(
                 MUSE_SLACK_TOKEN,
@@ -581,7 +563,6 @@ class CommentViewSet(viewsets.ModelViewSet):
                 f"댓글 삭제 ERROR: {request.user.nickname}, comment {pk}",
             )
             return Response({"message": "ERROR: COMMENT DELETE"}, status=401)
-        return Response(status=200)
 
     def partial_update(self, request, pk=None):
         # PATCH host/comment/pk/
@@ -607,6 +588,27 @@ class CommentViewSet(viewsets.ModelViewSet):
                 return Response({"message": "UNAUTHORIZED"}, status=401)
         except:
             return Response({"message": "REQUEST ERROR"}, status=400)
+
+    # @action(detail=True, methods=["post"])
+    # def delete(self, request, pk=None):
+    #     try:
+    #         if Comment.objects.filter(idx=pk, writer=request.user).exists():
+    #             Comment.objects.get(idx=pk).delete()
+    #             slack_post_message(
+    #                 MUSE_SLACK_TOKEN,
+    #                 "#muse-dev" if DEV else "#muse-prod",
+    #                 f"댓글 삭제: {request.user.nickname}, comment {pk}",
+    #             )
+    #             return Response(status=200)
+    #         else:
+    #             return Response({"message": "ERROR: COMMENT DELETE > NONE"}, status=400)
+    #     except:
+    #         slack_post_message(
+    #             MUSE_SLACK_TOKEN,
+    #             "#muse-dev-error" if DEV else "#muse-prod-error",
+    #             f"댓글 삭제 ERROR: {request.user.nickname}, comment {pk}",
+    #         )
+    #         return Response({"message": "ERROR: COMMENT DELETE"}, status=401)
 
 
 '''
