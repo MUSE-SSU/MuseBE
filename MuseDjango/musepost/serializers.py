@@ -225,17 +225,6 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
     def get_hashtag(self, obj):
         return list(obj.hashtag.names())
 
-    # def get_comment(self, obj):
-    #     comment_obj = Comment.objects.filter(post=obj.idx)
-    #     try:
-    #         login_user = self.context.get("request").user
-    #     except:
-    #         login_user = None
-    #     comment_serialized = CommentDisplaySerializer(
-    #         comment_obj, context={"login_user": login_user}, many=True
-    #     )
-    #     return comment_serialized.data
-
     def get_is_writer(self, obj):
         try:
             login_user = self.context.get("request").user

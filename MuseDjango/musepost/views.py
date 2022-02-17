@@ -5,6 +5,7 @@ import requests
 from django.http import JsonResponse
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from vine import Thenable
 from accounts.models import User
 from .models import *
 from topics.models import Topic
