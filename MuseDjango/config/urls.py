@@ -37,6 +37,3 @@ urlpatterns = [
     path("api/topics/", include("topics.urls")),
     path("api/search/", search_views.integrated_search, name="integrated-search"),
 ]
-
-# path("accounts/", include("accounts.urls")),
-# path("posts/", include("musepost.urls")),
