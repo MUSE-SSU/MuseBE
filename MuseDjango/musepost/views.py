@@ -140,12 +140,12 @@ class PostViewSet(viewsets.ModelViewSet):
             limit = int(page * PAGE_SIZE)
             offset = int(limit - PAGE_SIZE)
 
-            if order_by == "recent":
-                post = qs.order_by("-created_at")
+            if order_by == "likes":
+                post = qs.order_by("-likes", "-views", "-created_at")
             elif order_by == "views":
                 post = qs.order_by("-views", "-created_at")
-            else:  # Default: likes
-                post = qs.order_by("-likes", "-views")
+            else:  # 최신순
+                post = qs.order_by("-created_at", "-likes")
 
             count_post = post.count()
 
