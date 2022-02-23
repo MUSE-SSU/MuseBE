@@ -124,14 +124,21 @@ def select_muse():
     """매주 일요일 00시: 뮤즈 선정"""
     # 좋아요 가장 많이 받은 게시물, 동점의 경우, 조회수 더 많은 게시물
     contest_post = Post.objects.filter(category="contest", cur_status=True)
-    muse_post = contest_post.order_by("-likes", "-views").first()
-    muse_post.is_muse = True
-    muse_post.save()
-    # 뮤즈 선정 점수
-    muse_post.writer.profile.score += MUSE_SCORE
-    muse_post.writer.profile.muse += 1
-    muse_post.writer.profile.badge = 5
-    muse_post.writer.profile.save()
+    if contest_post:
+        muse_post = contest_post.order_by("-likes", "-views").first()
+        muse_post.is_muse = True
+        muse_post.save()
+        # 뮤즈 선정 점수
+        muse_post.writer.profile.score += MUSE_SCORE
+        muse_post.writer.profile.muse += 1
+        muse_post.writer.profile.badge = 5
+        muse_post.writer.profile.save()
+    else:
+        slack_post_message(
+            MUSE_SLACK_TOKEN,
+            "#muse-dev" if DEV else "#muse-prod",
+            "🛠이번 주 콘테스트 게시물이 없습니다!",
+        )
     # 콘테스트 주제 week 변경
     past_topic = Topic.objects.get(activate_week=True)
     past_topic.activate_week = False
