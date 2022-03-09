@@ -137,7 +137,7 @@ def select_muse():
         slack_post_message(
             MUSE_SLACK_TOKEN,
             "#muse-dev" if DEV else "#muse-prod",
-            "🛠이번 주 콘테스트 게시물이 없습니다!",
+            "🛠이번 주 콘테스트 게시물이 없습니다...!",
         )
     # 콘테스트 주제 week 변경
     past_topic = Topic.objects.get(activate_week=True)

@@ -309,13 +309,15 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def muse(self, request):
-        # GET host/post/list_muse
-        # muse 선정된 게시물, 최신 주차별로 정렬
+        # GET host/post/muse
+        # muse 선정된 게시물
         try:
-            post = Post.objects.filter(is_muse=True).order_by("-week", "-created_at")
+            post = Post.objects.filter(is_muse=True).order_by("week")
+            print(post[0])
             serializer = MuseDisplaySerializer(
                 post, context={"request": request}, many=True
             )
+
             return Response(serializer.data, status=200)
         except:
             return Response({"message": "ERROR: LIST MUSE"}, status=400)
