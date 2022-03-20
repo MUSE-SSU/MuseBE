@@ -38,10 +38,10 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute=30, hour=6, day_of_week="monday"),
     },
     # # 매일 자정 - 사용하는 게시물이 없는 해시태그 삭제
-    # "delete_hashtag_not_use": {
-    #     "task": "musepost.tasks.remove_all_tags_without_objects",
-    #     "schedule": crontab(minute=0, hour=0),
-    # },
+    "delete_hashtag_not_use": {
+        "task": "musepost.tasks.remove_all_tags_without_objects",
+        "schedule": crontab(minute=0, hour=0),
+    },
 }
 
 
