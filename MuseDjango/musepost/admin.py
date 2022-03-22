@@ -186,6 +186,7 @@ class ColorOfWeekAdmin(admin.ModelAdmin):
         "color4",
         "color5",
         "cur_status",
+        "created_at",
     ]
 
 

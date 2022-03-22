@@ -105,8 +105,9 @@ def select_weekly_tasks():
     """매주 일요일 자정 (뮤즈 선정 / 이번 주 색상 선정 / 모든 게시물 진행 상태 변경)"""
     try:
         select_muse()
-        select_week_color()
-        change_post_status()
+        # select_week_color()
+        # change_post_status()
+        print("다음으로 넘어옴!")
         slack_post_message(
             MUSE_SLACK_TOKEN,
             "#muse-dev" if DEV else "#muse-prod",
