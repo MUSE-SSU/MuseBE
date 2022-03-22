@@ -243,6 +243,11 @@ class PostViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def color_of_week(self, request):
         # GET host/api/post/color_of_week/
+        slack_post_message(
+            MUSE_SLACK_TOKEN,
+            "#muse-dev" if DEV else "#muse-prod",
+            f"!!  {request.user.nickname}: 메인 페이지 접속 !!",
+        )
         try:
             qs = ColorOfWeek.objects.get(cur_status=True)
             serializer = ColorOfWeekSerializer(qs)
@@ -591,27 +596,6 @@ class CommentViewSet(viewsets.ModelViewSet):
                 return Response({"message": "UNAUTHORIZED"}, status=401)
         except:
             return Response({"message": "REQUEST ERROR"}, status=400)
-
-    # @action(detail=True, methods=["post"])
-    # def delete(self, request, pk=None):
-    #     try:
-    #         if Comment.objects.filter(idx=pk, writer=request.user).exists():
-    #             Comment.objects.get(idx=pk).delete()
-    #             slack_post_message(
-    #                 MUSE_SLACK_TOKEN,
-    #                 "#muse-dev" if DEV else "#muse-prod",
-    #                 f"댓글 삭제: {request.user.nickname}, comment {pk}",
-    #             )
-    #             return Response(status=200)
-    #         else:
-    #             return Response({"message": "ERROR: COMMENT DELETE > NONE"}, status=400)
-    #     except:
-    #         slack_post_message(
-    #             MUSE_SLACK_TOKEN,
-    #             "#muse-dev-error" if DEV else "#muse-prod-error",
-    #             f"댓글 삭제 ERROR: {request.user.nickname}, comment {pk}",
-    #         )
-    #         return Response({"message": "ERROR: COMMENT DELETE"}, status=401)
 
 
 '''

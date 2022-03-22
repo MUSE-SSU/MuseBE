@@ -193,7 +193,7 @@ class ColorOfWeek(models.Model):
 
     cur_status = models.BooleanField(default=True, verbose_name="이번 주 색상")
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(verbose_name="생성 날짜", auto_now_add=True)
 
     class Meta:
         db_table = "MUSE_ColorOfWeek"
