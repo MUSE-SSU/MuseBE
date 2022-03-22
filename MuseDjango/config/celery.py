@@ -20,8 +20,7 @@ app.conf.beat_schedule = {
     # 매주 월요일 자정 - 뮤즈 선정/이번 주 색상 선정/게시물 상태 변경
     "select_weekly_tasks": {
         "task": "musepost.tasks.select_weekly_tasks",
-        "schedule": 10.0
-        # "schedule": crontab(minute=0, hour=0, day_of_week="monday"),
+        "schedule": crontab(minute=0, hour=0, day_of_week="monday"),
     },
     # 매일 새벽 1시부터 8시까지 1시간마다 - 게시물 색상 추출
     "extract_image_color": {
