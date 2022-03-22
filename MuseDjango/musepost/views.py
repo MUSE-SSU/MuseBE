@@ -243,12 +243,12 @@ class PostViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def color_of_week(self, request):
         # GET host/api/post/color_of_week/
-        slack_post_message(
-            MUSE_SLACK_TOKEN,
-            "#muse-dev" if DEV else "#muse-prod",
-            f"!!  {request.user.nickname}: 메인 페이지 접속 !!",
-        )
         try:
+            slack_post_message(
+                MUSE_SLACK_TOKEN,
+                "#muse-dev" if DEV else "#muse-prod",
+                f"!! 메인 페이지 접속 !!",
+            )
             qs = ColorOfWeek.objects.get(cur_status=True)
             serializer = ColorOfWeekSerializer(qs)
             return Response(serializer.data, status=200)
