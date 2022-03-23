@@ -247,7 +247,7 @@ class PostViewSet(viewsets.ModelViewSet):
             slack_post_message(
                 MUSE_SLACK_TOKEN,
                 "#muse-dev" if DEV else "#muse-prod",
-                f"!! 메인 페이지 접속 !!",
+                "👋 메인 페이지 접속",
             )
             qs = ColorOfWeek.objects.get(cur_status=True)
             serializer = ColorOfWeekSerializer(qs)
