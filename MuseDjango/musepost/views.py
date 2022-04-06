@@ -318,7 +318,6 @@ class PostViewSet(viewsets.ModelViewSet):
         # muse 선정된 게시물
         try:
             post = Post.objects.filter(is_muse=True).order_by("week")
-            print(post[0])
             serializer = MuseDisplaySerializer(
                 post, context={"request": request}, many=True
             )
