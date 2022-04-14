@@ -1,11 +1,10 @@
 from django import db
 from django.db import models
 from accounts.models import User
-from common.upload_file import upload_post_image
+from common.upload_file import upload_post_image, upload_thumbnail_image, image_resize
 from config.asset_storage import PublicMediaStorage
 from taggit.managers import TaggableManager
 from taggit.models import TagBase, TaggedItemBase
-
 
 POST_CATEGORY = (
     ("contest", "콘테스트"),
@@ -27,6 +26,13 @@ class Post(models.Model):
     title = models.CharField(max_length=200, verbose_name="제목")
     image = models.ImageField(
         upload_to=upload_post_image, storage=PublicMediaStorage(), verbose_name="작품"
+    )
+    thumbnail = models.ImageField(
+        upload_to=upload_thumbnail_image,
+        storage=PublicMediaStorage(),
+        null=True,
+        blank=True,
+        verbose_name="썸네일",
     )
     content = models.TextField(
         max_length=1000, null=True, blank=True, verbose_name="내용"
@@ -64,6 +70,11 @@ class Post(models.Model):
 
     def __str__(self):
         return str(self.idx)
+
+    def save(self, *args, **kwargs):
+        if self.thumbnail:
+            image_resize(self.thumbnail)
+            super(Post, self).save()
 
 
 class PostColor(models.Model):

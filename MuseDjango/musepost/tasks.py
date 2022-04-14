@@ -12,10 +12,48 @@ from taggit.models import Tag
 from config.settings import MUSE_SLACK_TOKEN, DEV
 from common.slack_api import slack_post_message
 from topics.models import Topic
+from common.upload_file import image_resize2
+
 
 logger = logging.getLogger("api")
 
 MUSE_SCORE = 100000
+from config.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+import os
+from PIL import Image
+import boto3
+import io
+
+# set aws credentials
+s3 = boto3.resource(
+    "s3",
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+)
+
+
+def get_image(filename):
+    bucket = s3.Bucket("muse-bucket")
+    object = bucket.Object(filename)
+    data = object.get().get("Body").read()
+    print(data)
+    return Image.open(io.BytesIO(data))
+    # response = object.get()
+    # file_stream = response["Body"]
+    # img = Image.open(file_stream)
+    # return img
+
+
+@shared_task
+def thumbnail_extract():
+    object = Post.objects.filter(thumbnail=None)[:5]
+    for obj in object:
+        thumbnail = get_image(obj.image)
+        print(thumbnail)
+        print(type(thumbnail))
+        # obj.thumbnail
+        # print(obj.thumbnail)
+        # image_resize2(obj.thumbnail)
 
 
 def closest_colour(requested_colour):

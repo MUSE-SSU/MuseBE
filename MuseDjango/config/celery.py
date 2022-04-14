@@ -17,6 +17,10 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
+    "thththth": {
+        "task": "musepost.tasks.thumbnail_extract",
+        "schedule": 10,
+    },
     # 매주 월요일 자정 - 뮤즈 선정/이번 주 색상 선정/게시물 상태 변경
     "select_weekly_tasks": {
         "task": "musepost.tasks.select_weekly_tasks",
