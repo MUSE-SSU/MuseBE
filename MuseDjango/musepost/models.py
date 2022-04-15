@@ -71,10 +71,10 @@ class Post(models.Model):
     def __str__(self):
         return str(self.idx)
 
-    # def save(self, *args, **kwargs):
-    #     if self.thumbnail:
-    #         image_resize(self.thumbnail)
-    #     super(Post, self).save()
+    def save(self, *args, **kwargs):
+        if self.thumbnail:
+            image_resize(self.thumbnail)
+        super(Post, self).save()
 
 
 class PostColor(models.Model):

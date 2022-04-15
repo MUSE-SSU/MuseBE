@@ -94,7 +94,7 @@ def image_resize(image, width=500, height=500):
         image.save(img_filename, file_object)
 
 
-def image_resize2(obj):
+def origin_image_to_thumbnail_save(obj):
     # Open the image using Pillow
     img = Image.open(obj.image)
     width = int(img.width * 0.5)
