@@ -47,7 +47,9 @@ def thumbnail_extract():
     queryset = Post.objects.all()
 
     for obj in queryset:
+        print(obj)
         image_resize2(obj)
+    print("======DONE======")
 
 
 def closest_colour(requested_colour):
