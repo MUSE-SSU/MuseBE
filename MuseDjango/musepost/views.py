@@ -23,7 +23,7 @@ from common.authentication import (
     authorization_validator_or_none,
     MUSEAuthenticationForWeb,
 )
-from common.upload_file import image_resize
+from common.upload_file import image_resize, origin_image_to_thumbnail_save
 from .serializers import *
 import random
 from .tasks import get_image_color, remove_all_tags_without_objects
@@ -65,7 +65,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     "title": title,
                     "content": content,
                     "image": image,
-                    "thumbnail": image,
+                    #        "thumbnail": image,
                     "hashtag": hashtag,
                     "category": upload_type,
                     "ref_url": ref_url,
@@ -84,7 +84,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     "title": title,
                     "content": content,
                     "image": image,
-                    "thumbnail": image,
+                    #       "thumbnail": image,
                     "hashtag": hashtag,
                     "week": week,
                     "topic": topic,
@@ -94,6 +94,8 @@ class PostViewSet(viewsets.ModelViewSet):
             serializer = PostUploadSerializer(data=data, partial=True)
             if serializer.is_valid():
                 uploaded_post = serializer.save()
+                print(uploaded_post)
+                origin_image_to_thumbnail_save(uploaded_post)
 
                 # 게시물 등록 점수
                 request.user.profile.score += UPLOAD_POST_SCORE
