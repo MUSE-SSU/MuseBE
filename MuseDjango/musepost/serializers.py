@@ -39,6 +39,7 @@ class PostDisplayAllSerializer(serializers.ModelSerializer):
     is_login_user_liked = serializers.SerializerMethodField()
     is_writer = serializers.SerializerMethodField()
     badge = serializers.SerializerMethodField()
+    # thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         # 무한스크롤 페이지
@@ -59,6 +60,9 @@ class PostDisplayAllSerializer(serializers.ModelSerializer):
             "is_login_user_liked",
             "is_writer",
         )
+
+    # def get_thumbnail(self, obj):
+    #     return obj.thumbnail if obj.thumbnail else obj.image
 
     def get_badge(self, obj):
         try:

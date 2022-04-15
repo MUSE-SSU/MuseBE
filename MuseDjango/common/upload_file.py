@@ -56,7 +56,7 @@ def upload_thumbnail_image(instance, filename):
 
 from django.core.files import File
 from pathlib import Path
-from PIL import Image
+from PIL import Image, ImageOps
 from io import BytesIO
 
 image_types = {
@@ -69,15 +69,18 @@ image_types = {
 }
 
 
-def image_resize(image, width=500, height=500):
+def image_resize(image, width=700, height=700):
     # Open the image using Pillow
     img = Image.open(image)
 
     # check if either the width or height is greater than the max
     if img.width > width or img.height > height:
-        output_size = (width, height)
+        new_width = int(img.width * 0.5)
+        new_height = int(img.height * 0.5)
+        output_size = (new_width, new_height)
         # Create a new resized “thumbnail” version of the image with Pillow
-        img.resize(output_size, Image.ANTIALIAS)
+        fixed_img = ImageOps.exif_transpose(img)
+        fixed_img.thumbnail(output_size)
         # Find the file name of the image
         img_filename = Path(image.file.name).name
         # Spilt the filename on “.” to get the file extension only
@@ -86,7 +89,7 @@ def image_resize(image, width=500, height=500):
         img_format = image_types[img_suffix]
         # Save the resized image into the buffer, noting the correct file type
         buffer = BytesIO()
-        img.save(buffer, format=img_format, quality=85)
+        fixed_img.save(buffer, format=img_format, quality=80)
         # return buffer.getvalue()
         # # Wrap the buffer in File object
         file_object = File(buffer)
@@ -104,16 +107,17 @@ def origin_image_to_thumbnail_save(obj, width=700, height=700):
         new_height = int(img.height * 0.5)
         output_size = (new_width, new_height)
         # Create a new resized “thumbnail” version of the image with Pillow
-        img.resize(output_size, Image.ANTIALIAS)
+        fixed_img = ImageOps.exif_transpose(img)
+        fixed_img.thumbnail(output_size)
         # Find the file name of the image
-        img_filename = "tmp" + Path(obj.image.file.name).name
+        img_filename = Path(obj.image.file.name).name
         # Spilt the filename on “.” to get the file extension only
         img_suffix = Path(obj.image.file.name).name.split(".")[-1]
         # Use the file extension to determine the file type from the image_types dictionary
         img_format = image_types[img_suffix]
         # Save the resized image into the buffer, noting the correct file type
         buffer = BytesIO()
-        img.save(buffer, format=img_format, quality=80)
+        fixed_img.save(buffer, format=img_format, quality=80)
         # Wrap the buffer in File object
         file_object = File(buffer)
 
@@ -121,7 +125,7 @@ def origin_image_to_thumbnail_save(obj, width=700, height=700):
         obj.thumbnail.save(img_filename, file_object)
     else:
         # Find the file name of the image
-        img_filename = "tmp" + Path(obj.image.file.name).name
+        img_filename = Path(obj.image.file.name).name
         # Spilt the filename on “.” to get the file extension only
         img_suffix = Path(obj.image.file.name).name.split(".")[-1]
         # Use the file extension to determine the file type from the image_types dictionary

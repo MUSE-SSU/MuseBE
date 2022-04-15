@@ -13,7 +13,7 @@ app = Celery("config")
 # -namespace='CELERY' 의 의미는 셀러리와 관련된 모든 설정은 CELERY_ 라는 prefix로 시작함을 의미
 app.config_from_object("django.conf:settings", namespace="CELERY")
 
-# Django 에 등록된 모든 task 모듈을 로드
+# 등록된 모든 task 모듈을 로드
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
