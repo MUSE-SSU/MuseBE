@@ -35,25 +35,19 @@ s3 = boto3.resource(
 def get_image(filename):
     bucket = s3.Bucket("muse-bucket")
     object = bucket.Object(filename)
-    data = object.get().get("Body").read()
-    print(data)
-    return Image.open(io.BytesIO(data))
-    # response = object.get()
-    # file_stream = response["Body"]
-    # img = Image.open(file_stream)
-    # return img
+    response = object.get()
+    file_stream = response["Body"]
+    img = Image.open(file_stream)
+
+    return img
 
 
 @shared_task
 def thumbnail_extract():
-    object = Post.objects.filter(thumbnail=None)[:5]
-    for obj in object:
-        thumbnail = get_image(obj.image)
-        print(thumbnail)
-        print(type(thumbnail))
-        # obj.thumbnail
-        # print(obj.thumbnail)
-        # image_resize2(obj.thumbnail)
+    queryset = Post.objects.all()
+
+    for obj in queryset:
+        image_resize2(obj)
 
 
 def closest_colour(requested_colour):

@@ -74,7 +74,7 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         if self.thumbnail:
             image_resize(self.thumbnail)
-            super(Post, self).save()
+        super(Post, self).save()
 
 
 class PostColor(models.Model):
