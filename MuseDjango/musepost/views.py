@@ -93,9 +93,8 @@ class PostViewSet(viewsets.ModelViewSet):
 
             serializer = PostUploadSerializer(data=data, partial=True)
             if serializer.is_valid():
-                print("asdf")
                 uploaded_post = serializer.save()
-                print("asdfsadf")
+
                 # 게시물 등록 점수
                 request.user.profile.score += UPLOAD_POST_SCORE
                 request.user.profile.save()

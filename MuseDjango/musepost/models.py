@@ -71,10 +71,8 @@ class Post(models.Model):
     def __str__(self):
         return str(self.idx)
 
-    def save(self, thm_check=False, *args, **kwargs):
-        print("asdfasdf")
-        print(thm_check)
-        if self.thumbnail and thm_check:
+    def save(self, *args, **kwargs):
+        if self.thumbnail:
             image_resize(self.thumbnail)
         super(Post, self).save()
 
