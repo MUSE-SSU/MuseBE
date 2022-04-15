@@ -81,6 +81,7 @@ class PostAdmin(admin.ModelAdmin):
         "views",
         "likes",
         "get_image",
+        "get_thumbnail",
         "get_hashtag",
         "category",
         "ref_url",
@@ -100,6 +101,9 @@ class PostAdmin(admin.ModelAdmin):
 
     def get_image(self, obj):
         return str(obj.image)[:22]
+
+    def get_thumbnail(self, obj):
+        return str(obj.thumbnail)[:22]
 
     def get_hashtag(self, obj):
         tags = []

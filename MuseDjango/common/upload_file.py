@@ -77,7 +77,7 @@ def image_resize(image, width=500, height=500):
     if img.width > width or img.height > height:
         output_size = (width, height)
         # Create a new resized “thumbnail” version of the image with Pillow
-        img.thumbnail(output_size)
+        img.resize(output_size, Image.ANTIALIAS)
         # Find the file name of the image
         img_filename = Path(image.file.name).name
         # Spilt the filename on “.” to get the file extension only
@@ -86,7 +86,7 @@ def image_resize(image, width=500, height=500):
         img_format = image_types[img_suffix]
         # Save the resized image into the buffer, noting the correct file type
         buffer = BytesIO()
-        img.save(buffer, format=img_format)
+        img.save(buffer, format=img_format, quality=85)
         # return buffer.getvalue()
         # # Wrap the buffer in File object
         file_object = File(buffer)
@@ -94,16 +94,17 @@ def image_resize(image, width=500, height=500):
         image.save(img_filename, file_object)
 
 
-def origin_image_to_thumbnail_save(obj):
+def origin_image_to_thumbnail_save(obj, width=700, height=700):
     # Open the image using Pillow
     img = Image.open(obj.image)
-    width = int(img.width * 0.5)
-    height = int(img.height * 0.5)
+
     # check if either the width or height is greater than the max
     if img.width > width or img.height > height:
-        output_size = (width, height)
+        new_width = int(img.width * 0.5)
+        new_height = int(img.height * 0.5)
+        output_size = (new_width, new_height)
         # Create a new resized “thumbnail” version of the image with Pillow
-        img.thumbnail(output_size)
+        img.resize(output_size, Image.ANTIALIAS)
         # Find the file name of the image
         img_filename = "tmp" + Path(obj.image.file.name).name
         # Spilt the filename on “.” to get the file extension only
@@ -112,7 +113,7 @@ def origin_image_to_thumbnail_save(obj):
         img_format = image_types[img_suffix]
         # Save the resized image into the buffer, noting the correct file type
         buffer = BytesIO()
-        img.save(buffer, format=img_format)
+        img.save(buffer, format=img_format, quality=80)
         # Wrap the buffer in File object
         file_object = File(buffer)
 

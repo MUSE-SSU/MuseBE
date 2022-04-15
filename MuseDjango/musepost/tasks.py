@@ -23,7 +23,7 @@ MUSE_SCORE = 100000
 @shared_task
 def thumbnail_extract():
     # 기존 이미지로 썸네일 만들어서 저장
-    queryset = Post.objects.all()
+    queryset = Post.objects.filter(idx__gte=447)
 
     for obj in queryset:
         print(obj.idx)
