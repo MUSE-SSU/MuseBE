@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "taggit_serializer",
     "rest_framework",
     "rest_framework.authtoken",
+    # "imagekit",
     # "rest_framework_jwt",
     # 'rest_auth',
     # MY APP
@@ -246,3 +247,11 @@ LOGGING = {
         },
     },
 }
+
+
+DJANGORESIZED_DEFAULT_SIZE = [640, 480]
+DJANGORESIZED_DEFAULT_QUALITY = 75
+DJANGORESIZED_DEFAULT_KEEP_META = True
+DJANGORESIZED_DEFAULT_FORCE_FORMAT = "JPEG"
+DJANGORESIZED_DEFAULT_FORMAT_EXTENSIONS = {"JPEG": ".jpg"}
+DJANGORESIZED_DEFAULT_NORMALIZE_ROTATION = True

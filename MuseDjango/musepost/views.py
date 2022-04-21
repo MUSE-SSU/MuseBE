@@ -23,6 +23,7 @@ from common.authentication import (
     authorization_validator_or_none,
     MUSEAuthenticationForWeb,
 )
+from common.upload_file import image_resize, origin_image_to_thumbnail_save
 from .serializers import *
 import random
 from .tasks import get_image_color, remove_all_tags_without_objects
@@ -64,11 +65,11 @@ class PostViewSet(viewsets.ModelViewSet):
                     "title": title,
                     "content": content,
                     "image": image,
+                    #        "thumbnail": image,
                     "hashtag": hashtag,
                     "category": upload_type,
                     "ref_url": ref_url,
                 }
-
             elif upload_type == "contest":
                 try:
                     cur_contest = Topic.objects.get(activate_week=True)
@@ -83,6 +84,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     "title": title,
                     "content": content,
                     "image": image,
+                    #       "thumbnail": image,
                     "hashtag": hashtag,
                     "week": week,
                     "topic": topic,
@@ -92,6 +94,9 @@ class PostViewSet(viewsets.ModelViewSet):
             serializer = PostUploadSerializer(data=data, partial=True)
             if serializer.is_valid():
                 uploaded_post = serializer.save()
+                print(uploaded_post)
+                origin_image_to_thumbnail_save(uploaded_post)
+
                 # 게시물 등록 점수
                 request.user.profile.score += UPLOAD_POST_SCORE
                 request.user.profile.save()
@@ -99,8 +104,12 @@ class PostViewSet(viewsets.ModelViewSet):
                 slack_post_message(
                     MUSE_SLACK_TOKEN,
                     "#muse-dev" if DEV else "#muse-prod",
-                    f"👍게시물 {uploaded_post.idx} 작성: {request.user.nickname}",
+                    f"👍게시물 작성: {request.user.nickname}",
                 )
+
+                # 썸네일 추출
+                # thumbnail_extract.delay(image)
+
                 # 이미지 색상 추출
                 # get_image_color.delay(uploaded_post.idx)
 
@@ -116,7 +125,7 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({"message": "ERROR: POST CREATE"}, status=400)
 
     def list(self, request):
-        # GET host/post/?type=reference&page=1&order_by=likes
+        # GET host/post/?type=reference&page=1&order=likes
         try:
             post_type = request.query_params.get("type", None)
             page = int(request.query_params.get("page", None))

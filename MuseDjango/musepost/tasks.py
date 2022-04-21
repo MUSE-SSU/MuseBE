@@ -12,10 +12,23 @@ from taggit.models import Tag
 from config.settings import MUSE_SLACK_TOKEN, DEV
 from common.slack_api import slack_post_message
 from topics.models import Topic
+from common.upload_file import origin_image_to_thumbnail_save
+
 
 logger = logging.getLogger("api")
 
 MUSE_SCORE = 100000
+
+
+@shared_task
+def thumbnail_extract():
+    # 기존 이미지로 썸네일 만들어서 저장
+    queryset = Post.objects.filter(idx__gte=374)
+    # queryset = Post.objects.all()
+    for obj in queryset:
+        print(obj.idx)
+        origin_image_to_thumbnail_save(obj)
+    print("======DONE======")
 
 
 def closest_colour(requested_colour):

@@ -16,6 +16,7 @@ class PostUploadSerializer(TaggitSerializer, serializers.ModelSerializer):
             "title",
             "writer",
             "image",
+            "thumbnail",
             "content",
             "week",
             "topic",
@@ -38,6 +39,7 @@ class PostDisplayAllSerializer(serializers.ModelSerializer):
     is_login_user_liked = serializers.SerializerMethodField()
     is_writer = serializers.SerializerMethodField()
     badge = serializers.SerializerMethodField()
+    thumb_img = serializers.SerializerMethodField()
 
     class Meta:
         # 무한스크롤 페이지
@@ -49,7 +51,7 @@ class PostDisplayAllSerializer(serializers.ModelSerializer):
             "badge",
             "title",
             "content",
-            "image",
+            "thumb_img",
             "views",
             "likes",
             "topic",
@@ -58,6 +60,12 @@ class PostDisplayAllSerializer(serializers.ModelSerializer):
             "is_login_user_liked",
             "is_writer",
         )
+
+    def get_thumb_img(self, obj):
+        if obj.thumbnail:
+            return MEDIA_URL + str(obj.thumbnail)
+        else:
+            return MEDIA_URL + str(obj.image)
 
     def get_badge(self, obj):
         try:

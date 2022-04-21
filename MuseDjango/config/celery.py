@@ -13,10 +13,14 @@ app = Celery("config")
 # -namespace='CELERY' 의 의미는 셀러리와 관련된 모든 설정은 CELERY_ 라는 prefix로 시작함을 의미
 app.config_from_object("django.conf:settings", namespace="CELERY")
 
-# Django 에 등록된 모든 task 모듈을 로드합니다.
+# 등록된 모든 task 모듈을 로드
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
+    # "origin_image_to_thumbnail": {
+    #     "task": "musepost.tasks.thumbnail_extract",
+    #     "schedule": 60,
+    # },
     # 매주 월요일 자정 - 뮤즈 선정/이번 주 색상 선정/게시물 상태 변경
     "select_weekly_tasks": {
         "task": "musepost.tasks.select_weekly_tasks",
