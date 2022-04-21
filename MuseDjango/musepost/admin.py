@@ -4,6 +4,7 @@ from .models import *
 from .color_constants import COLOR_CHECK
 from colorthief import ColorThief
 import webcolors
+from common.upload_file import origin_image_to_thumbnail_save
 
 
 def closest_colour(requested_colour):
@@ -27,49 +28,66 @@ def get_colour_name(requested_colour):
 
 
 def admin_get_image_color(modeladmin, request, queryset):
-    for post in queryset:
-        color_thief = ColorThief(post.image)
+    try:
+        for post in queryset:
+            color_thief = ColorThief(post.image)
 
-        # get domminat color
-        dominant_color = color_thief.get_color(quality=1)
-        dominant_actual_name, dominant_closest_name = get_colour_name(dominant_color)
+            # get domminat color
+            dominant_color = color_thief.get_color(quality=1)
+            dominant_actual_name, dominant_closest_name = get_colour_name(
+                dominant_color
+            )
 
-        # get palette color
-        palette = color_thief.get_palette(color_count=3)
-        plt_name = []
-        for plt in palette:
-            plt_actual_name, plt_closest_name = get_colour_name(plt)
-            if plt_actual_name:
-                plt_name.append(plt_actual_name)
+            # get palette color
+            palette = color_thief.get_palette(color_count=3)
+            plt_name = []
+            for plt in palette:
+                plt_actual_name, plt_closest_name = get_colour_name(plt)
+                if plt_actual_name:
+                    plt_name.append(plt_actual_name)
+                else:
+                    plt_name.append(plt_closest_name)
+
+            # Replace Color Name with Spacing & Upper Case
+            temp_colors = []
+            if dominant_actual_name:
+                temp_colors.append(dominant_actual_name)
             else:
-                plt_name.append(plt_closest_name)
+                temp_colors.append(dominant_closest_name)
+            temp_colors.extend(plt_name)
 
-        # Replace Color Name with Spacing & Upper Case
-        temp_colors = []
-        if dominant_actual_name:
-            temp_colors.append(dominant_actual_name)
-        else:
-            temp_colors.append(dominant_closest_name)
-        temp_colors.extend(plt_name)
+            replace_colors = []
+            for idx, full_color in enumerate(temp_colors):
+                replace_color_name = full_color
+                for key, value in COLOR_CHECK.items():
+                    if key in replace_color_name:
+                        replace_color_name = replace_color_name.replace(
+                            key, value + " "
+                        )
+                replace_colors.append(replace_color_name.rstrip())
 
-        replace_colors = []
-        for idx, full_color in enumerate(temp_colors):
-            replace_color_name = full_color
-            for key, value in COLOR_CHECK.items():
-                if key in replace_color_name:
-                    replace_color_name = replace_color_name.replace(key, value + " ")
-            replace_colors.append(replace_color_name.rstrip())
+            # save color
+            post.dominant_color = replace_colors[0]
+            post.palette_color1 = replace_colors[1]
+            post.palette_color2 = replace_colors[2]
+            post.palette_color3 = replace_colors[3]
 
-        # save color
-        post.dominant_color = replace_colors[0]
-        post.palette_color1 = replace_colors[1]
-        post.palette_color2 = replace_colors[2]
-        post.palette_color3 = replace_colors[3]
+            post.save()
+    except:
+        print("ERROR: ADMIN GET IMAGE COLOR")
 
-        post.save()
+
+def admin_origin_image_to_thumbnail_save(modeladmin, request, queryset):
+    try:
+        for q in queryset:
+            if not q.thumbnail:
+                origin_image_to_thumbnail_save(q)
+    except:
+        print("ERROR: ADMIN ORIGIN IMAGEW TO THUMBNAIL")
 
 
 admin_get_image_color.short_description = "이미지 색상 추출"
+admin_origin_image_to_thumbnail_save.short_description = "이미지 썸네일 추출"
 
 
 class PostAdmin(admin.ModelAdmin):
@@ -112,9 +130,10 @@ class PostAdmin(admin.ModelAdmin):
         return ", ".join(tags)
 
     get_image.short_description = "이미지"
+    get_thumbnail.short_description = "썸네일"
     get_hashtag.short_description = "해시태그"
 
-    actions = [admin_get_image_color]
+    actions = [admin_get_image_color, admin_origin_image_to_thumbnail_save]
     list_per_page = 20
 
 
