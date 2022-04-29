@@ -496,7 +496,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     # 각 최다 해시태그가 사용된 게시물 중에서 랜덤으로 (이미지, 해시태그) 1쌍 반환
                     random_post = random.choice(queryset)
                     temp_dict = {
-                        "image": MEDIA_URL + str(random_post.image),
+                        "image": MEDIA_URL + str(random_post.thumbnail),
                         "tag": tag.name,
                     }
                     result.append(temp_dict)
