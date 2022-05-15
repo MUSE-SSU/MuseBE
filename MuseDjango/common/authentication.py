@@ -15,13 +15,16 @@ class MUSEAuthenticationForWeb(authentication.BaseAuthentication):
         else:
             try:
                 auth_header = request.headers.get("Authorization", None)
-                payload = jwt.decode(
-                    auth_header, SECRET_KEY, algorithms=SECRET_ALGORITHM
-                )
-                user_id = payload["user_id"]
-                login_user = User.objects.get(user_id=user_id)
 
-                return (login_user, None)
+                if auth_header and auth_header != "null":
+                    payload = jwt.decode(
+                        auth_header, SECRET_KEY, algorithms=SECRET_ALGORITHM
+                    )
+                    user_id = payload["user_id"]
+                    login_user = User.objects.get(user_id=user_id)
+                    return (login_user, None)
+                else:
+                    return (None, None)
 
             except jwt.exceptions.DecodeError:
                 return JsonResponse({"message": "INVALID_TOKEN"}, status=401)
