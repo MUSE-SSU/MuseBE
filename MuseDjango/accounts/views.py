@@ -135,7 +135,7 @@ class UserViewSet(viewsets.ModelViewSet):
         # GET host/account/
         try:
             if not request.user:
-                return Response({"message": "ERROR: USER RETRIEVE > NONE"}, status=400)
+                return Response({"message": "NONE USER"}, status=202)
             serializer = UserInfoSerializer(request.user)
             return Response(serializer.data, status=200)
         except:
