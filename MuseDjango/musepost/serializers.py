@@ -167,6 +167,7 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             "badge",
             "title",
             "image",
+            "thumbnail",
             "content",
             "ref_url",
             "views",

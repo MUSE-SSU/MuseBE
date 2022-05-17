@@ -94,7 +94,7 @@ class PostViewSet(viewsets.ModelViewSet):
             serializer = PostUploadSerializer(data=data, partial=True)
             if serializer.is_valid():
                 uploaded_post = serializer.save()
-                print(uploaded_post)
+                # print(uploaded_post)
                 origin_image_to_thumbnail_save(uploaded_post)
 
                 # 게시물 등록 점수
