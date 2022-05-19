@@ -458,12 +458,13 @@ class PostViewSet(viewsets.ModelViewSet):
                     | palette5_query
                 )
                 .distinct()
+                .order_by("?")
             )
 
             if not recommend_post:
                 return Response({"message": "POST RECOMMEND > NONE"}, status=200)
             else:
-                PAGE_SIZE = 8
+                PAGE_SIZE = 10
                 limit = int(page * PAGE_SIZE)
                 offset = int(limit - PAGE_SIZE)
 

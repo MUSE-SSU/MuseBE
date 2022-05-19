@@ -52,6 +52,7 @@ class PostDisplayAllSerializer(serializers.ModelSerializer):
             "title",
             "content",
             "thumb_img",
+            "image",
             "views",
             "likes",
             "topic",
@@ -60,6 +61,7 @@ class PostDisplayAllSerializer(serializers.ModelSerializer):
             "is_login_user_liked",
             "is_writer",
         )
+        read_only_fields = fields
 
     def get_thumb_img(self, obj):
         if obj.thumbnail:
@@ -183,6 +185,7 @@ class PostDisplayDetailSerializer(serializers.ModelSerializer):
             "modified_at",
             "hashtag",
         )
+        read_only_fields = fields
 
     def get_badge(self, obj):
         try:
