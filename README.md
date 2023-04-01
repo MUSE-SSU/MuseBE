@@ -11,7 +11,7 @@
 ### 소개
 
 > MUSE는 하나의 주제에 대해서 사람에 따라 다양하게 표현될 수 있는 창의성에 대해 서로 공유하고 이를 통해 작가들의 영감을 고취하는 창작지원 서비스입니다.<br/>
-> muse 바로가기 <a>https://muse.seoul.kr/</a>
+> ~~muse 바로가기 <a>https://muse.seoul.kr/</a>~~ 2023.01 자로 Deprecated 되었습니다.
 
 ### Architecture
 <img width="1025" alt="Muse Architecture" src="https://user-images.githubusercontent.com/61671097/165908035-3d38c3e0-dc7b-4018-a875-4722853e079b.png">
